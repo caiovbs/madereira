@@ -1,0 +1,639 @@
+{
+  "info": {
+    "name": "Madereira API",
+    "description": "Collection completa da API de gestão de madeireira.\n\n## Como usar\n1. Importe este arquivo no Postman\n2. A variável `baseUrl` já está configurada para `http://localhost:3000`\n3. Execute o **Fluxo Completo** de cima para baixo — cada request salva automaticamente os IDs necessários para os próximos\n4. Para testar módulos isolados, use as pastas individuais e preencha manualmente as variáveis de ID\n\n## Variáveis da collection\n- `baseUrl` — URL base da API\n- `tipoMadeiraId`, `produtoId`, `fornecedorId`, `clienteId`, `funcionarioId`, `caminhaoId` — IDs de cadastros\n- `compraId`, `vendaId`, `tarefaId`, `entregaId`, `lancamentoId` — IDs das operações",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "tipoMadeiraId", "value": "", "type": "string" },
+    { "key": "produtoId", "value": "", "type": "string" },
+    { "key": "fornecedorId", "value": "", "type": "string" },
+    { "key": "clienteId", "value": "", "type": "string" },
+    { "key": "funcionarioId", "value": "", "type": "string" },
+    { "key": "caminhaoId", "value": "", "type": "string" },
+    { "key": "compraId", "value": "", "type": "string" },
+    { "key": "vendaId", "value": "", "type": "string" },
+    { "key": "tarefaId", "value": "", "type": "string" },
+    { "key": "entregaId", "value": "", "type": "string" },
+    { "key": "lancamentoId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔁 Fluxo Completo",
+      "description": "Execute os requests nesta ordem. Cada um salva o ID gerado automaticamente como variável da collection.",
+      "item": [
+        {
+          "name": "01 - Criar Tipo de Madeira",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('tipoMadeiraId', d.id);", "pm.test('Status 201', () => pm.response.to.have.status(201));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/tipos-madeira",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Pinus\"\n}" }
+          }
+        },
+        {
+          "name": "02 - Criar Produto",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('produtoId', d.id);", "pm.test('Status 201', () => pm.response.to.have.status(201));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/produtos",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipoId\": \"{{tipoMadeiraId}}\",\n  \"estado\": \"bruta\",\n  \"espessuraCm\": 5,\n  \"larguraCm\": 30,\n  \"comprimentoEstoqueM\": 3.0,\n  \"preco\": 25.00,\n  \"custo\": 15.00,\n  \"estoqueMinimo\": 10\n}" }
+          }
+        },
+        {
+          "name": "03 - Criar Fornecedor",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('fornecedorId', d.id);", "pm.test('Status 201', () => pm.response.to.have.status(201));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/fornecedores",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Madeireira São Paulo Ltda\",\n  \"telefone\": \"11999990000\"\n}" }
+          }
+        },
+        {
+          "name": "04 - Criar Compra (Pedido)",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('compraId', d.id);", "pm.test('Status 201', () => pm.response.to.have.status(201));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/compras",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"fornecedorId\": \"{{fornecedorId}}\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 100,\n      \"custoUnit\": 15.00\n    }\n  ]\n}" }
+          }
+        },
+        {
+          "name": "05 - Receber Compra (entrada no estoque)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));", "pm.test('Status recebida', () => pm.expect(pm.response.json().data.status).to.eql('recebida'));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/compras/{{compraId}}/receber",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"formaPagamento\": \"pix\"\n}" }
+          }
+        },
+        {
+          "name": "06 - Criar Cliente",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('clienteId', d.id);", "pm.test('Status 201', () => pm.response.to.have.status(201));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/clientes",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"João da Silva\",\n  \"telefone\": \"11988880000\",\n  \"endereco\": \"Rua das Flores, 123\"\n}" }
+          }
+        },
+        {
+          "name": "07 - Criar Funcionário (Motorista)",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('funcionarioId', d.id);", "pm.test('Status 201', () => pm.response.to.have.status(201));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/funcionarios",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Carlos Oliveira\",\n  \"funcoes\": [\"motorista\"],\n  \"telefone\": \"11977770000\"\n}" }
+          }
+        },
+        {
+          "name": "08 - Criar Caminhão",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('caminhaoId', d.id);", "pm.test('Status 201', () => pm.response.to.have.status(201));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/caminhoes",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"descricao\": \"Fiat Ducato Branco\",\n  \"placa\": \"ABC-1234\"\n}" }
+          }
+        },
+        {
+          "name": "09 - Criar Venda (Orçamento) — com corte",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('vendaId', d.id);", "pm.test('Status 201', () => pm.response.to.have.status(201));", "pm.test('Status orcamento', () => pm.expect(d.status).to.eql('orcamento'));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/vendas",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"obraRef\": \"Obra Rua das Flores\",\n  \"tipoEntrega\": \"entrega\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 10,\n      \"cortarParaM\": 2.5,\n      \"aparelhar\": false\n    }\n  ],\n  \"frete\": 50.00,\n  \"desconto\": 0\n}" }
+          }
+        },
+        {
+          "name": "10 - Fechar Venda",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));", "pm.test('Status fechada', () => pm.expect(pm.response.json().data.status).to.eql('fechada'));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/vendas/{{vendaId}}/fechar",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"formaPagamento\": \"dinheiro\"\n}" }
+          }
+        },
+        {
+          "name": "11 - Listar Tarefas da Venda",
+          "event": [{ "listen": "test", "script": { "exec": ["const data = pm.response.json().data;", "if (data && data.length > 0) {", "  pm.collectionVariables.set('tarefaId', data[0].id);", "}", "pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Tem tarefas', () => pm.expect(data.length).to.be.above(0));"] } }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/patio/tarefas?vendaId={{vendaId}}", "host": ["{{baseUrl}}"], "path": ["patio", "tarefas"], "query": [{ "key": "vendaId", "value": "{{vendaId}}" }] }
+          }
+        },
+        {
+          "name": "12 - Concluir Tarefa",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));", "pm.test('Status concluida', () => pm.expect(pm.response.json().data.status).to.eql('concluida'));"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/patio/tarefas/{{tarefaId}}/concluir"
+          }
+        },
+        {
+          "name": "13 - Listar Entrega da Venda",
+          "event": [{ "listen": "test", "script": { "exec": ["const data = pm.response.json().data;", "if (data && data.length > 0) {", "  pm.collectionVariables.set('entregaId', data[0].id);", "}", "pm.test('Status 200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/entregas?vendaId={{vendaId}}", "host": ["{{baseUrl}}"], "path": ["entregas"], "query": [{ "key": "vendaId", "value": "{{vendaId}}" }] }
+          }
+        },
+        {
+          "name": "14 - Configurar Entrega (Motorista + Caminhão)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/entregas/{{entregaId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"motoristaId\": \"{{funcionarioId}}\",\n  \"caminhaoId\": \"{{caminhaoId}}\",\n  \"endereco\": \"Rua das Flores, 123\",\n  \"dataAgendada\": \"2026-07-01\",\n  \"turno\": \"manha\"\n}" }
+          }
+        },
+        {
+          "name": "15 - Avançar Entrega → carregado",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));", "pm.test('Status carregado', () => pm.expect(pm.response.json().data.status).to.eql('carregado'));"] } }],
+          "request": { "method": "POST", "url": "{{baseUrl}}/entregas/{{entregaId}}/avancar" }
+        },
+        {
+          "name": "16 - Avançar Entrega → em_rota",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));", "pm.test('Status em_rota', () => pm.expect(pm.response.json().data.status).to.eql('em_rota'));"] } }],
+          "request": { "method": "POST", "url": "{{baseUrl}}/entregas/{{entregaId}}/avancar" }
+        },
+        {
+          "name": "17 - Avançar Entrega → entregue",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Status 201', () => pm.response.to.have.status(201));", "pm.test('Status entregue', () => pm.expect(pm.response.json().data.status).to.eql('entregue'));"] } }],
+          "request": { "method": "POST", "url": "{{baseUrl}}/entregas/{{entregaId}}/avancar" }
+        },
+        {
+          "name": "18 - Ver Caixa",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.test('Status 200', () => pm.response.to.have.status(200));", "pm.test('Tem saldo', () => pm.expect(d).to.have.property('saldo'));", "console.log('Caixa:', JSON.stringify(d));"] } }],
+          "request": { "method": "GET", "url": "{{baseUrl}}/financeiro/caixa" }
+        }
+      ]
+    },
+    {
+      "name": "🌲 Tipos de Madeira",
+      "item": [
+        {
+          "name": "Listar Tipos",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/tipos-madeira?ativo=true", "host": ["{{baseUrl}}"], "path": ["tipos-madeira"], "query": [{ "key": "ativo", "value": "true" }, { "key": "search", "value": "", "disabled": true }] } }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/tipos-madeira/{{tipoMadeiraId}}" }
+        },
+        {
+          "name": "Criar Tipo",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('tipoMadeiraId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/tipos-madeira",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Eucalipto\"\n}" }
+          }
+        },
+        {
+          "name": "Atualizar Tipo",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/tipos-madeira/{{tipoMadeiraId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Eucalipto Citriodora\"\n}" }
+          }
+        },
+        {
+          "name": "Desativar Tipo",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/tipos-madeira/{{tipoMadeiraId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ativo\": false\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Produtos",
+      "item": [
+        {
+          "name": "Listar Produtos",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/produtos?page=1&pageSize=20", "host": ["{{baseUrl}}"], "path": ["produtos"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }, { "key": "search", "value": "", "disabled": true }, { "key": "tipoId", "value": "", "disabled": true }, { "key": "estado", "value": "bruta", "disabled": true }] } }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/produtos/{{produtoId}}" }
+        },
+        {
+          "name": "Criar Produto",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('produtoId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/produtos",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipoId\": \"{{tipoMadeiraId}}\",\n  \"estado\": \"aparelhada\",\n  \"espessuraCm\": 5,\n  \"larguraCm\": 10,\n  \"comprimentoEstoqueM\": 3.0,\n  \"preco\": 35.00,\n  \"custo\": 20.00,\n  \"estoqueMinimo\": 5\n}" }
+          }
+        },
+        {
+          "name": "Atualizar Preço",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/produtos/{{produtoId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"preco\": 28.00,\n  \"estoqueMinimo\": 15\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Clientes",
+      "item": [
+        {
+          "name": "Listar Clientes",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/clientes?page=1&pageSize=20", "host": ["{{baseUrl}}"], "path": ["clientes"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }, { "key": "search", "value": "", "disabled": true }] } }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/clientes/{{clienteId}}" }
+        },
+        {
+          "name": "Criar Cliente",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('clienteId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/clientes",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Maria Santos\",\n  \"telefone\": \"11966660000\",\n  \"documento\": \"123.456.789-00\"\n}" }
+          }
+        },
+        {
+          "name": "Atualizar Cliente",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/clientes/{{clienteId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"telefone\": \"11955551234\",\n  \"endereco\": \"Av. Paulista, 1000\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏭 Fornecedores",
+      "item": [
+        {
+          "name": "Listar Fornecedores",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/fornecedores?page=1&pageSize=20", "host": ["{{baseUrl}}"], "path": ["fornecedores"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }] } }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/fornecedores/{{fornecedorId}}" }
+        },
+        {
+          "name": "Criar Fornecedor",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('fornecedorId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/fornecedores",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Madeiras do Sul\",\n  \"telefone\": \"51999990000\",\n  \"observacao\": \"Pagar somente via transferência\"\n}" }
+          }
+        },
+        {
+          "name": "Atualizar Fornecedor",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/fornecedores/{{fornecedorId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"observacao\": \"Aceita PIX e transferência\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👷 Funcionários",
+      "item": [
+        {
+          "name": "Listar Funcionários",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/funcionarios", "host": ["{{baseUrl}}"], "path": ["funcionarios"], "query": [{ "key": "funcao", "value": "motorista", "disabled": true }, { "key": "ativo", "value": "true", "disabled": true }] } }
+        },
+        {
+          "name": "Listar Motoristas",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/funcionarios?funcao=motorista", "host": ["{{baseUrl}}"], "path": ["funcionarios"], "query": [{ "key": "funcao", "value": "motorista" }] } }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/funcionarios/{{funcionarioId}}" }
+        },
+        {
+          "name": "Criar Funcionário",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('funcionarioId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/funcionarios",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Pedro Aparelhador\",\n  \"funcoes\": [\"aparelhador\", \"cortador\"],\n  \"telefone\": \"11944440000\"\n}" }
+          }
+        },
+        {
+          "name": "Atualizar Funcionário",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/funcionarios/{{funcionarioId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"funcoes\": [\"aparelhador\", \"cortador\", \"carregador\"]\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚚 Caminhões",
+      "item": [
+        {
+          "name": "Listar Caminhões",
+          "request": { "method": "GET", "url": "{{baseUrl}}/caminhoes" }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/caminhoes/{{caminhaoId}}" }
+        },
+        {
+          "name": "Criar Caminhão",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('caminhaoId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/caminhoes",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"descricao\": \"Mercedes Sprinter Prata\",\n  \"placa\": \"DEF-5678\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛒 Compras",
+      "item": [
+        {
+          "name": "Listar Compras",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/compras?page=1&pageSize=20", "host": ["{{baseUrl}}"], "path": ["compras"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }, { "key": "status", "value": "pedido", "disabled": true }] } }
+        },
+        {
+          "name": "Listar Compras Pendentes",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/compras?status=pedido", "host": ["{{baseUrl}}"], "path": ["compras"], "query": [{ "key": "status", "value": "pedido" }] } }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/compras/{{compraId}}" }
+        },
+        {
+          "name": "Criar Compra",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('compraId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/compras",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"fornecedorId\": \"{{fornecedorId}}\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 50,\n      \"custoUnit\": 15.00\n    }\n  ],\n  \"formaPagamento\": \"prazo\",\n  \"vencimento\": \"2026-08-01\"\n}" }
+          }
+        },
+        {
+          "name": "Atualizar Compra (adicionar item)",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/compras/{{compraId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 80,\n      \"custoUnit\": 14.50\n    }\n  ]\n}" }
+          }
+        },
+        {
+          "name": "Receber Compra (pagamento à vista)",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/compras/{{compraId}}/receber",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"formaPagamento\": \"pix\"\n}" }
+          }
+        },
+        {
+          "name": "Receber Compra (pagamento a prazo)",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/compras/{{compraId}}/receber",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"formaPagamento\": \"prazo\",\n  \"vencimento\": \"2026-08-15\"\n}" }
+          }
+        },
+        {
+          "name": "Cancelar Compra",
+          "request": { "method": "POST", "url": "{{baseUrl}}/compras/{{compraId}}/cancelar" }
+        }
+      ]
+    },
+    {
+      "name": "💰 Vendas",
+      "item": [
+        {
+          "name": "Listar Vendas",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/vendas?page=1&pageSize=20", "host": ["{{baseUrl}}"], "path": ["vendas"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }, { "key": "status", "value": "orcamento", "disabled": true }, { "key": "clienteId", "value": "", "disabled": true }] } }
+        },
+        {
+          "name": "Listar Orçamentos",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/vendas?status=orcamento", "host": ["{{baseUrl}}"], "path": ["vendas"], "query": [{ "key": "status", "value": "orcamento" }] } }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/vendas/{{vendaId}}" }
+        },
+        {
+          "name": "Criar Venda — Retirada (sem corte)",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('vendaId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/vendas",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"tipoEntrega\": \"retirada\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 5\n    }\n  ]\n}" }
+          }
+        },
+        {
+          "name": "Criar Venda — Entrega com corte e aparelho",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('vendaId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/vendas",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"clienteId\": \"{{clienteId}}\",\n  \"obraRef\": \"Reforma sala\",\n  \"tipoEntrega\": \"entrega\",\n  \"itens\": [\n    {\n      \"produtoId\": \"{{produtoId}}\",\n      \"quantidade\": 20,\n      \"cortarParaM\": 2.0,\n      \"aparelhar\": true\n    }\n  ],\n  \"frete\": 80.00,\n  \"desconto\": 50.00\n}" }
+          }
+        },
+        {
+          "name": "Atualizar Venda (adicionar desconto)",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/vendas/{{vendaId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"desconto\": 30.00,\n  \"obraRef\": \"Reforma sala - revisado\"\n}" }
+          }
+        },
+        {
+          "name": "Fechar Venda — Dinheiro",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/vendas/{{vendaId}}/fechar",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"formaPagamento\": \"dinheiro\"\n}" }
+          }
+        },
+        {
+          "name": "Fechar Venda — PIX",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/vendas/{{vendaId}}/fechar",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"formaPagamento\": \"pix\"\n}" }
+          }
+        },
+        {
+          "name": "Fechar Venda — A prazo",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/vendas/{{vendaId}}/fechar",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"formaPagamento\": \"prazo\",\n  \"vencimento\": \"2026-07-30\"\n}" }
+          }
+        },
+        {
+          "name": "Cancelar Venda",
+          "request": { "method": "POST", "url": "{{baseUrl}}/vendas/{{vendaId}}/cancelar" }
+        }
+      ]
+    },
+    {
+      "name": "🔨 Pátio",
+      "item": [
+        {
+          "name": "Listar Todas as Tarefas",
+          "request": { "method": "GET", "url": "{{baseUrl}}/patio/tarefas" }
+        },
+        {
+          "name": "Listar Tarefas Pendentes",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/patio/tarefas?status=pendente", "host": ["{{baseUrl}}"], "path": ["patio", "tarefas"], "query": [{ "key": "status", "value": "pendente" }] } }
+        },
+        {
+          "name": "Listar Tarefas de Preparar",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/patio/tarefas?tipo=preparar&status=pendente", "host": ["{{baseUrl}}"], "path": ["patio", "tarefas"], "query": [{ "key": "tipo", "value": "preparar" }, { "key": "status", "value": "pendente" }] } }
+        },
+        {
+          "name": "Listar Tarefas da Venda",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/patio/tarefas?vendaId={{vendaId}}", "host": ["{{baseUrl}}"], "path": ["patio", "tarefas"], "query": [{ "key": "vendaId", "value": "{{vendaId}}" }] } }
+        },
+        {
+          "name": "Buscar Tarefa por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/patio/tarefas/{{tarefaId}}" }
+        },
+        {
+          "name": "Concluir Tarefa",
+          "request": { "method": "POST", "url": "{{baseUrl}}/patio/tarefas/{{tarefaId}}/concluir" }
+        }
+      ]
+    },
+    {
+      "name": "🚛 Entregas",
+      "item": [
+        {
+          "name": "Listar Entregas",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/entregas?page=1&pageSize=20", "host": ["{{baseUrl}}"], "path": ["entregas"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }, { "key": "status", "value": "a_carregar", "disabled": true }, { "key": "motoristaId", "value": "", "disabled": true }] } }
+        },
+        {
+          "name": "Listar Entregas A Carregar",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/entregas?status=a_carregar", "host": ["{{baseUrl}}"], "path": ["entregas"], "query": [{ "key": "status", "value": "a_carregar" }] } }
+        },
+        {
+          "name": "Buscar Entrega da Venda",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/entregas?vendaId={{vendaId}}", "host": ["{{baseUrl}}"], "path": ["entregas"], "query": [{ "key": "vendaId", "value": "{{vendaId}}" }] } }
+        },
+        {
+          "name": "Buscar por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/entregas/{{entregaId}}" }
+        },
+        {
+          "name": "Atualizar Entrega",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/entregas/{{entregaId}}",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"motoristaId\": \"{{funcionarioId}}\",\n  \"caminhaoId\": \"{{caminhaoId}}\",\n  \"endereco\": \"Rua das Flores, 123 - Jardim Primavera\",\n  \"dataAgendada\": \"2026-07-05\",\n  \"turno\": \"manha\",\n  \"observacao\": \"Portão verde, ligar antes\"\n}" }
+          }
+        },
+        {
+          "name": "Avançar Status (→ carregado / em_rota / entregue)",
+          "request": { "method": "POST", "url": "{{baseUrl}}/entregas/{{entregaId}}/avancar" }
+        }
+      ]
+    },
+    {
+      "name": "💵 Financeiro",
+      "item": [
+        {
+          "name": "Ver Caixa",
+          "request": { "method": "GET", "url": "{{baseUrl}}/financeiro/caixa" }
+        },
+        {
+          "name": "Listar Lançamentos",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/financeiro/lancamentos?page=1&pageSize=20", "host": ["{{baseUrl}}"], "path": ["financeiro", "lancamentos"], "query": [{ "key": "page", "value": "1" }, { "key": "pageSize", "value": "20" }, { "key": "situacao", "value": "previsto", "disabled": true }, { "key": "sentido", "value": "saida", "disabled": true }, { "key": "origemTipo", "value": "avulso", "disabled": true }] } }
+        },
+        {
+          "name": "Listar A Receber",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/financeiro/lancamentos?sentido=entrada&situacao=previsto", "host": ["{{baseUrl}}"], "path": ["financeiro", "lancamentos"], "query": [{ "key": "sentido", "value": "entrada" }, { "key": "situacao", "value": "previsto" }] } }
+        },
+        {
+          "name": "Listar A Pagar",
+          "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/financeiro/lancamentos?sentido=saida&situacao=previsto", "host": ["{{baseUrl}}"], "path": ["financeiro", "lancamentos"], "query": [{ "key": "sentido", "value": "saida" }, { "key": "situacao", "value": "previsto" }] } }
+        },
+        {
+          "name": "Buscar Lançamento por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/financeiro/lancamentos/{{lancamentoId}}" }
+        },
+        {
+          "name": "Criar Despesa Avulsa",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('lancamentoId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/financeiro/lancamentos",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"sentido\": \"saida\",\n  \"descricao\": \"Combustível caminhão Julho\",\n  \"categoria\": \"combustivel\",\n  \"valor\": 350.00,\n  \"vencimento\": \"2026-07-10\"\n}" }
+          }
+        },
+        {
+          "name": "Criar Receita Avulsa",
+          "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json().data;", "pm.collectionVariables.set('lancamentoId', d.id);"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/financeiro/lancamentos",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"sentido\": \"entrada\",\n  \"descricao\": \"Venda à vista balcão\",\n  \"valor\": 120.00\n}" }
+          }
+        },
+        {
+          "name": "Realizar Lançamento (previsto → realizado)",
+          "request": { "method": "POST", "url": "{{baseUrl}}/financeiro/lancamentos/{{lancamentoId}}/realizar" }
+        }
+      ]
+    },
+    {
+      "name": "⚠️ Erros Esperados (Validações)",
+      "description": "Estes requests devem retornar erro. Use para confirmar que as regras de negócio estão funcionando.",
+      "item": [
+        {
+          "name": "Tentar fechar venda já fechada → 422",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/vendas/{{vendaId}}/fechar",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"formaPagamento\": \"dinheiro\"\n}" }
+          }
+        },
+        {
+          "name": "Tentar avançar entrega com tarefa pendente → 422",
+          "request": { "method": "POST", "url": "{{baseUrl}}/entregas/{{entregaId}}/avancar" }
+        },
+        {
+          "name": "Criar tipo de madeira duplicado → 409",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/tipos-madeira",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nome\": \"Pinus\"\n}" }
+          }
+        },
+        {
+          "name": "Criar produto sem tipoId válido → 404",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/produtos",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipoId\": \"00000000-0000-0000-0000-000000000000\",\n  \"estado\": \"bruta\",\n  \"espessuraCm\": 5,\n  \"larguraCm\": 30,\n  \"comprimentoEstoqueM\": 3.0,\n  \"preco\": 25.00\n}" }
+          }
+        },
+        {
+          "name": "Criar produto com body inválido → 400",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/produtos",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"invalido\",\n  \"espessuraCm\": -1\n}" }
+          }
+        },
+        {
+          "name": "Fechar compra a prazo sem vencimento → 422",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/compras/{{compraId}}/receber",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"formaPagamento\": \"prazo\"\n}" }
+          }
+        }
+      ]
+    }
+  ]
+}

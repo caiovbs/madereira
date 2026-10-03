@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: madeireira-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: madeireira
+      POSTGRES_PASSWORD: madeireira
+      POSTGRES_DB: madeireira
+    ports:
+      - "5432:5432"
+    volumes:
+      - madeireira_pgdata:/var/lib/postgresql/data
+
+volumes:
+  madeireira_pgdata:

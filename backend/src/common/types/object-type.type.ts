@@ -1,0 +1,15 @@
+export type ObjectType =
+  | 'Produto'
+  | 'TipoMadeira'
+  | 'MovimentoEstoque'
+  | 'Cliente'
+  | 'Fornecedor'
+  | 'Funcionario'
+  | 'Caminhao'
+  | 'Venda'
+  | 'ItemVenda'
+  | 'Compra'
+  | 'ItemCompra'
+  | 'TarefaPatio'
+  | 'Entrega'
+  | 'LancamentoFinanceiro';
