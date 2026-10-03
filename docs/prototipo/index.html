@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Madeireira — Protótipo</title>
+<style>
+  :root{
+    --bg:#f5f5f4; --panel:#fff; --ink:#1c1917; --muted:#78716c; --line:#e7e5e4;
+    --accent:#b45309; --accent-soft:#fef3c7; --accent-ink:#92400e;
+    --green:#16a34a; --green-soft:#dcfce7; --red:#dc2626; --red-soft:#fee2e2;
+    --blue:#2563eb; --blue-soft:#dbeafe; --amber:#d97706; --amber-soft:#fef3c7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+  .app{display:grid;grid-template-columns:230px 1fr;grid-template-rows:56px 1fr;height:100vh}
+  /* topbar */
+  .topbar{grid-column:1/3;display:flex;align-items:center;gap:16px;background:var(--panel);border-bottom:1px solid var(--line);padding:0 18px}
+  .logo{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px}
+  .search{flex:1;max-width:420px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--muted)}
+  .btn{border:none;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;font-size:13px}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+  .btn-green{background:var(--green);color:#fff}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-weight:700}
+  /* sidebar */
+  .sidebar{background:var(--panel);border-right:1px solid var(--line);padding:10px;overflow:auto}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;color:#44403c;font-weight:500;margin-bottom:2px}
+  .nav-item:hover{background:var(--bg)}
+  .nav-item.active{background:var(--accent-soft);color:var(--accent-ink);font-weight:700}
+  .nav-sep{height:1px;background:var(--line);margin:8px 6px}
+  .nav-sub{font-size:12px;color:var(--muted);padding:6px 12px 2px;text-transform:uppercase;letter-spacing:.04em}
+  .nav-child{padding-left:34px;font-size:13px}
+  /* content */
+  .content{overflow:auto;padding:24px 28px}
+  .screen{display:none}
+  .screen.active{display:block}
+  h1{font-size:20px;margin-bottom:4px}
+  .sub{color:var(--muted);margin-bottom:20px}
+  .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+  .spacer{flex:1}
+  .chip-filter{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:#44403c;cursor:pointer}
+  .input{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px}
+  /* cards */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer}
+  .kpi:hover{border-color:var(--accent)}
+  .kpi .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .kpi .value{font-size:24px;font-weight:700;margin-top:6px}
+  .kpi .note{font-size:12px;margin-top:4px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:12px}
+  .row-line{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}
+  .row-line:last-child{border:none}
+  /* table */
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);padding:12px 14px;background:#fafaf9;border-bottom:1px solid var(--line)}
+  td{padding:12px 14px;border-bottom:1px solid var(--line)}
+  tr:last-child td{border-bottom:none}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:#fafaf9}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  /* badges */
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:600}
+  .b-green{background:var(--green-soft);color:#166534}
+  .b-gray{background:#f5f5f4;color:#57534e;border:1px solid var(--line)}
+  .b-amber{background:var(--amber-soft);color:#92400e}
+  .b-red{background:var(--red-soft);color:#991b1b}
+  .b-blue{background:var(--blue-soft);color:#1e40af}
+  .warn{color:var(--red);font-weight:700}
+  .muted{color:var(--muted)}
+  .pos{color:var(--green);font-weight:600}
+  /* venda editor */
+  .editor{display:grid;grid-template-columns:1fr 300px;gap:16px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .add-row{display:flex;gap:8px;margin-bottom:14px}
+  .add-row .input:first-child{flex:1}
+  .sum-line{display:flex;justify-content:space-between;padding:7px 0}
+  .sum-total{display:flex;justify-content:space-between;padding:10px 0;border-top:2px solid var(--ink);margin-top:6px;font-weight:700;font-size:16px}
+  .section-t{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:16px 0 8px}
+  .radio{display:flex;gap:14px;margin-bottom:8px}
+  .prep{font-size:12px;color:var(--accent-ink);margin-top:3px}
+  /* kanban */
+  .kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .kcol{background:#fafaf9;border:1px solid var(--line);border-radius:12px;padding:10px;min-height:300px}
+  .kcol h4{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:6px 4px 10px}
+  .kcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px}
+  .kcard .t{font-weight:700;margin-bottom:4px}
+  /* patio */
+  .task{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+  .task.done{opacity:.55}
+  .check{display:block;padding:4px 0;color:#44403c}
+  /* tabs */
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px}
+  .tab{padding:10px 16px;cursor:pointer;color:var(--muted);font-weight:600;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.active{color:var(--accent-ink);border-bottom-color:var(--accent)}
+  .subview{display:none}.subview.active{display:block}
+  /* drawer */
+  .drawer{position:fixed;top:0;right:0;width:420px;height:100vh;background:var(--panel);border-left:1px solid var(--line);box-shadow:-8px 0 24px rgba(0,0,0,.08);padding:24px;transform:translateX(100%);transition:.25s;overflow:auto;z-index:50}
+  .drawer.open{transform:translateX(0)}
+  .drawer h2{font-size:17px;margin-bottom:18px}
+  .fld{margin-bottom:14px}
+  .fld label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+  .fld .input{width:100%}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .gen-name{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:10px;font-weight:600;margin:10px 0}
+  .ok{color:var(--green);font-size:12px;font-weight:600}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{background:var(--accent-soft);color:var(--accent-ink);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:40;display:none}
+  .overlay.open{display:block}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">🪵 Madeireira</div>
+    <div class="search">🔍 buscar produto / cliente...</div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary" onclick="show('vendas');setSub('vendas','editor')">+ Nova venda</button>
+    <div class="avatar">C</div>
+  </div>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-item active" data-nav="inicio" onclick="show('inicio')">🏠 Início</div>
+    <div class="nav-item" data-nav="vendas" onclick="show('vendas')">🧾 Vendas</div>
+    <div class="nav-item" data-nav="estoque" onclick="show('estoque')">📦 Estoque</div>
+    <div class="nav-item" data-nav="compras" onclick="show('compras')">🛒 Compras</div>
+    <div class="nav-item" data-nav="patio" onclick="show('patio')">🪚 Pátio</div>
+    <div class="nav-item" data-nav="entregas" onclick="show('entregas')">🚚 Entregas</div>
+    <div class="nav-item" data-nav="financeiro" onclick="show('financeiro')">💰 Financeiro</div>
+    <div class="nav-sep"></div>
+    <div class="nav-sub">Cadastros</div>
+    <div class="nav-item nav-child" data-nav="cadastros" onclick="show('cadastros')">Funcionários</div>
+    <div class="nav-item nav-child" onclick="show('cadastros')">Clientes</div>
+    <div class="nav-item nav-child" onclick="show('cadastros')">Fornecedores</div>
+    <div class="nav-item nav-child" onclick="show('cadastros')">Caminhões</div>
+  </div>
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- INÍCIO -->
+    <div class="screen active" id="inicio">
+      <h1>Início</h1>
+      <div class="sub">Sexta, 16 de junho de 2026 — o pulso da madeireira</div>
+      <div class="kpis">
+        <div class="kpi" onclick="show('financeiro')"><div class="label">Saldo do caixa</div><div class="value">R$ 8.450</div><div class="note muted">atualizado hoje</div></div>
+        <div class="kpi" onclick="show('financeiro')"><div class="label">A receber</div><div class="value">R$ 5.200</div><div class="note warn">⚠ 2 vencidas</div></div>
+        <div class="kpi" onclick="show('financeiro')"><div class="label">A pagar</div><div class="value">R$ 3.100</div><div class="note warn">⚠ 1 vencida</div></div>
+        <div class="kpi" onclick="show('estoque')"><div class="label">Estoque baixo</div><div class="value">3 itens</div><div class="note warn">⚠ repor</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <h3>Entregas de hoje</h3>
+          <div class="row-line"><span><b>#142</b> João Silva</span><span class="badge b-amber">a carregar</span></div>
+          <div class="row-line"><span><b>#138</b> Maria</span><span class="badge b-blue">em rota</span></div>
+          <div class="row-line"><span><b>#131</b> José</span><span class="badge b-green">entregue</span></div>
+        </div>
+        <div class="card">
+          <h3>Pátio — tarefas pendentes</h3>
+          <div class="row-line"><span>✂🪚 Preparar <b>#142</b> · cortar + aparelhar</span><span class="badge b-amber">pendente</span></div>
+          <div class="row-line"><span>📦 Separar <b>#145</b> · retirada</span><span class="badge b-amber">pendente</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENDAS -->
+    <div class="screen" id="vendas">
+      <h1>Vendas</h1>
+      <div class="sub">Orçamentos e vendas</div>
+      <div class="tabs">
+        <div class="tab active" data-sub="vendas-lista" onclick="setSub('vendas','lista')">Lista</div>
+        <div class="tab" data-sub="vendas-editor" onclick="setSub('vendas','editor')">Editor de venda</div>
+      </div>
+      <div class="subview active" id="vendas-lista">
+        <div class="toolbar">
+          <span class="chip-filter">Status ▾</span><span class="chip-filter">Período ▾</span>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" onclick="setSub('vendas','editor')">+ Nova venda</button>
+        </div>
+        <table>
+          <thead><tr><th>Nº</th><th>Cliente</th><th>Data</th><th class="num">Total</th><th>Pagamento</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr onclick="setSub('vendas','editor')"><td><b>#142</b></td><td>João Silva</td><td>16/06</td><td class="num">2.924,00</td><td>A receber</td><td><span class="badge b-green">Fechada</span></td></tr>
+            <tr><td><b>#141</b></td><td>Maria</td><td>15/06</td><td class="num">820,00</td><td>Pago</td><td><span class="badge b-green">Fechada</span></td></tr>
+            <tr><td><b>#140</b></td><td>Construtora Y</td><td>15/06</td><td class="num">5.100,00</td><td class="muted">—</td><td><span class="badge b-gray">Orçamento</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="subview" id="vendas-editor">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+          <button class="btn btn-ghost" onclick="setSub('vendas','lista')">← Voltar</button>
+          <b style="font-size:16px">Nova venda</b>
+          <span class="badge b-gray">Orçamento</span>
+          <span class="hint">💾 dá pra salvar incompleto e retomar depois (cliente manda o pedido em partes)</span>
+        </div>
+        <div class="editor">
+          <div>
+            <div class="panel" style="margin-bottom:14px">
+              <div class="grid3">
+                <div class="fld"><label>Cliente</label><input class="input" value="João Silva"></div>
+                <div class="fld"><label>Obra / ref.</label><input class="input" value="telhado"></div>
+                <div class="fld"><label>Data</label><input class="input" value="16/06/2026"></div>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="add-row">
+                <input class="input" placeholder="🔍 buscar produto...">
+                <input class="input" style="width:70px" placeholder="Qtd">
+                <button class="btn btn-ghost">Adicionar</button>
+              </div>
+              <table>
+                <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Unit</th><th class="num">Subtotal</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td>Pinus Bruta 5×30 3,0m<div class="prep">✂ cortar 2,50m · 🪚 aparelhar</div></td><td class="num">70</td><td class="num">38,00</td><td class="num">2.660,00</td><td>⋮</td></tr>
+                  <tr><td>Pinus Bruta 2,5×15 3,0m</td><td class="num">12</td><td class="num">12,00</td><td class="num">144,00</td><td>⋮</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="section-t">Resumo</div>
+            <div class="sum-line"><span>Subtotal</span><span>2.804,00</span></div>
+            <div class="sum-line"><span>Frete</span><span>120,00</span></div>
+            <div class="sum-line"><span>Desconto</span><span>0,00</span></div>
+            <div class="sum-total"><span>Total</span><span>2.924,00</span></div>
+            <div class="section-t">Entrega</div>
+            <div class="radio"><label>🔘 Entregar</label><label class="muted">⚪ Retirada</label></div>
+            <div class="fld"><input class="input" value="Rua X, 100" style="width:100%"></div>
+            <div class="grid2"><input class="input" placeholder="Caminhão ▾"><input class="input" placeholder="Motorista ▾"></div>
+            <div class="section-t">Pagamento</div>
+            <div class="fld"><input class="input" value="Pix" style="width:100%"></div>
+            <div class="radio"><label>🔘 Pago</label><label class="muted">⚪ A receber</label></div>
+            <button class="btn btn-ghost" style="width:100%;margin-bottom:8px">Salvar orçamento</button>
+            <button class="btn btn-green" style="width:100%">✓ Fechar venda</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ESTOQUE -->
+    <div class="screen" id="estoque">
+      <h1>Estoque</h1>
+      <div class="sub">Produtos / madeiras</div>
+      <div class="toolbar">
+        <span class="chip-filter">Tipo ▾</span><span class="chip-filter">Estado ▾</span><span class="chip-filter">☐ só baixo</span>
+        <div class="spacer"></div>
+        <button class="btn btn-primary" onclick="openDrawer('drawer-produto')">+ Novo produto</button>
+      </div>
+      <table>
+        <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Mín</th><th class="num">Custo</th><th class="num">Preço</th><th class="num">Margem</th><th></th></tr></thead>
+        <tbody>
+          <tr onclick="openDrawer('drawer-produto')"><td>Pinus Aparelhada 5×30 3,0m</td><td class="num">120</td><td class="num">30</td><td class="num">24,00</td><td class="num">38,00</td><td class="num pos">+14 (58%)</td><td><button class="btn btn-ghost">+entrada</button></td></tr>
+          <tr><td>Pinus Bruta 2,5×15 3,0m</td><td class="num">300</td><td class="num">50</td><td class="num">9,00</td><td class="num">12,00</td><td class="num pos">+3 (33%)</td><td><button class="btn btn-ghost">+entrada</button></td></tr>
+          <tr><td>Eucalipto Bruta 6×6 3,0m</td><td class="num warn">⚠ 18</td><td class="num">40</td><td class="num">16,00</td><td class="num">22,00</td><td class="num pos">+6 (38%)</td><td><button class="btn btn-ghost">+entrada</button></td></tr>
+        </tbody>
+      </table>
+      <p class="hint">Clique numa linha (ou em "Novo produto") para ver a ficha em drawer.</p>
+    </div>
+
+    <!-- COMPRAS -->
+    <div class="screen" id="compras">
+      <h1>Compras</h1>
+      <div class="sub">Reposição e pedidos a fornecedores</div>
+      <div class="card" style="margin-bottom:18px;border-color:var(--amber)">
+        <h3>⚠ Reposição sugerida</h3>
+        <div class="row-line"><span>Eucalipto Bruta 6×6 3,0m — tem 18 · mín 40 <b>· sugerido +22</b></span><button class="btn btn-ghost">+ pedido</button></div>
+        <div class="row-line"><span>Pinus Bruta 2,5×15 3,0m — tem 22 · mín 50 <b>· sugerido +28</b></span><button class="btn btn-ghost">+ pedido</button></div>
+      </div>
+      <div class="toolbar"><span class="chip-filter">Status ▾</span><span class="chip-filter">Período ▾</span><div class="spacer"></div><button class="btn btn-primary">+ Nova compra</button></div>
+      <table>
+        <thead><tr><th>Nº</th><th>Fornecedor</th><th>Data</th><th class="num">Total</th><th>Pagamento</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><b>#36</b></td><td>Serraria São José</td><td>16/06</td><td class="num">2.360,00</td><td>A pagar</td><td><span class="badge b-green">Recebida</span></td></tr>
+          <tr><td><b>#35</b></td><td>Madeireira Central</td><td>14/06</td><td class="num">1.800,00</td><td class="muted">—</td><td><span class="badge b-amber">⏳ Pedido</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PÁTIO -->
+    <div class="screen" id="patio">
+      <h1>Pátio — Tarefas</h1>
+      <div class="sub">Fila de preparo e separação</div>
+      <div class="toolbar"><span class="chip-filter">Pendentes ▾</span><span class="chip-filter">Tipo ▾</span></div>
+      <div class="task">
+        <div style="display:flex;justify-content:space-between"><b>✂🪚 PREPARAR · Venda #142 · João Silva</b><span class="badge b-amber">pendente</span></div>
+        <div class="muted" style="margin:6px 0">70 pç · Pinus Bruta 5×30 3,0m</div>
+        <span class="check">☐ cortar para 2,50m</span>
+        <span class="check">☐ aparelhar</span>
+        <div style="text-align:right;margin-top:10px"><button class="btn btn-green">✓ Concluir</button></div>
+      </div>
+      <div class="task">
+        <div style="display:flex;justify-content:space-between"><b>📦 SEPARAR · Venda #145 · Construtora Y (retirada)</b><span class="badge b-amber">pendente</span></div>
+        <div class="muted" style="margin:6px 0">30 pç · Eucalipto Bruta 6×6 3,0m</div>
+        <div style="text-align:right"><button class="btn btn-green">✓ Concluir</button></div>
+      </div>
+      <div class="task done">
+        <div style="display:flex;justify-content:space-between"><b>✅ PREPARAR · Venda #138 · Maria</b><span class="badge b-green">concluída</span></div>
+      </div>
+    </div>
+
+    <!-- ENTREGAS -->
+    <div class="screen" id="entregas">
+      <h1>Entregas</h1>
+      <div class="sub">Painel do dia</div>
+      <div class="toolbar"><span class="chip-filter">Hoje ▾</span><span class="chip-filter">Motorista ▾</span></div>
+      <div class="kanban">
+        <div class="kcol"><h4>A carregar</h4>
+          <div class="kcard"><div class="t">#142 João</div><div class="muted">📍 Rua X, 100 · 🕗 manhã</div><div style="margin-top:8px"><button class="btn btn-ghost" style="width:100%">→ Carregado</button></div></div>
+          <div class="kcard" style="opacity:.7"><div class="t">#145 Construtora Y</div><div class="warn" style="font-size:12px">⏳ aguardando pátio</div></div>
+        </div>
+        <div class="kcol"><h4>Carregado</h4>
+          <div class="kcard"><div class="t">#150 Pedro</div><div class="muted">Caminhão A · Zé</div><div style="margin-top:8px"><button class="btn btn-ghost" style="width:100%">→ Em rota</button></div></div>
+        </div>
+        <div class="kcol"><h4>Em rota</h4>
+          <div class="kcard"><div class="t">#138 Maria</div><div class="muted">Caminhão A · Zé</div><div style="margin-top:8px"><button class="btn btn-ghost" style="width:100%">→ Entregue</button></div></div>
+        </div>
+        <div class="kcol"><h4>Entregue</h4>
+          <div class="kcard"><div class="t">#131 José</div><div class="badge b-green">✓ 14:20</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div class="screen" id="financeiro">
+      <h1>Financeiro</h1>
+      <div class="sub">Caixa, a receber e a pagar</div>
+      <div class="tabs">
+        <div class="tab active" data-sub="fin-visao" onclick="setSub('fin','visao')">Visão geral</div>
+        <div class="tab" data-sub="fin-receber" onclick="setSub('fin','receber')">A receber</div>
+        <div class="tab" data-sub="fin-pagar" onclick="setSub('fin','pagar')">A pagar</div>
+        <div class="tab" data-sub="fin-caixa" onclick="setSub('fin','caixa')">Caixa</div>
+        <div class="spacer"></div>
+      </div>
+      <div class="subview active" id="fin-visao">
+        <div class="kpis" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kpi"><div class="label">Saldo do caixa</div><div class="value">R$ 8.450</div></div>
+          <div class="kpi"><div class="label">A receber</div><div class="value">R$ 5.200</div><div class="note warn">⚠ 2 vencidas</div></div>
+          <div class="kpi"><div class="label">A pagar</div><div class="value">R$ 3.100</div><div class="note warn">⚠ 1 vencida</div></div>
+        </div>
+        <div class="card"><h3>Movimentação de hoje</h3>
+          <div class="row-line"><span>Venda #142 · João (Pix)</span><span class="pos">+ 2.804,00</span></div>
+          <div class="row-line"><span>Combustível (avulso)</span><span class="warn">− 180,00</span></div>
+          <div class="row-line"><span>Recebido · Venda #138 · Maria</span><span class="pos">+ 1.500,00</span></div>
+        </div>
+      </div>
+      <div class="subview" id="fin-receber">
+        <table><thead><tr><th>Origem</th><th class="num">Valor</th><th>Vencimento</th><th></th></tr></thead><tbody>
+          <tr><td>Venda #142 · João</td><td class="num">2.804,00</td><td>20/06</td><td><button class="btn btn-green">✓ Recebi</button></td></tr>
+          <tr><td>Venda #131 · Construtora Y</td><td class="num">1.900,00</td><td class="warn">venceu 10/06 ⚠</td><td><button class="btn btn-green">✓ Recebi</button></td></tr>
+        </tbody></table>
+      </div>
+      <div class="subview" id="fin-pagar">
+        <table><thead><tr><th>Origem</th><th class="num">Valor</th><th>Vencimento</th><th></th></tr></thead><tbody>
+          <tr><td>Compra #36 · Serraria São José</td><td class="num">2.360,00</td><td>16/07</td><td><button class="btn btn-green">✓ Paguei</button></td></tr>
+          <tr><td>Energia (avulso)</td><td class="num">450,00</td><td class="warn">venceu 10/06 ⚠</td><td><button class="btn btn-green">✓ Paguei</button></td></tr>
+        </tbody></table>
+      </div>
+      <div class="subview" id="fin-caixa">
+        <div style="text-align:right;margin-bottom:10px"><b>Saldo: R$ 8.450,00</b></div>
+        <table><thead><tr><th>Data</th><th>Descrição</th><th class="num">Entrada</th><th class="num">Saída</th><th class="num">Saldo</th></tr></thead><tbody>
+          <tr><td>16/06</td><td>Venda #142 (Pix)</td><td class="num pos">2.804,00</td><td class="num"></td><td class="num">8.450,00</td></tr>
+          <tr><td>16/06</td><td>Combustível</td><td class="num"></td><td class="num warn">180,00</td><td class="num">5.646,00</td></tr>
+          <tr><td>15/06</td><td>Recebido Venda #138</td><td class="num pos">1.500,00</td><td class="num"></td><td class="num">5.826,00</td></tr>
+          <tr><td>01/06</td><td>Saldo inicial</td><td class="num pos">3.000,00</td><td class="num"></td><td class="num">3.000,00</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- CADASTROS -->
+    <div class="screen" id="cadastros">
+      <h1>Cadastros — Funcionários</h1>
+      <div class="sub">Mesmo padrão para Clientes, Fornecedores e Caminhões</div>
+      <div class="toolbar"><span class="chip-filter">☐ ver inativos</span><div class="spacer"></div><button class="btn btn-primary" onclick="openDrawer('drawer-func')">+ Novo</button></div>
+      <table>
+        <thead><tr><th>Nome</th><th>Funções</th><th>Telefone</th><th></th></tr></thead>
+        <tbody>
+          <tr onclick="openDrawer('drawer-func')"><td>Zé</td><td><span class="chip">Cortador</span> <span class="chip">Motorista</span></td><td>(11) 9...</td><td>✏ 🚫</td></tr>
+          <tr><td>Pedro</td><td><span class="chip">Carregador</span></td><td>(11) 9...</td><td>✏ 🚫</td></tr>
+          <tr><td>Antônio</td><td><span class="chip">Aparelhador</span></td><td>(11) 9...</td><td>✏ 🚫</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- DRAWERS -->
+<div class="overlay" id="overlay" onclick="closeDrawers()"></div>
+<div class="drawer" id="drawer-produto">
+  <h2>Ficha do Produto</h2>
+  <div class="grid2">
+    <div class="fld"><label>Tipo</label><input class="input" value="Pinus"></div>
+    <div class="fld"><label>Estado</label><input class="input" value="Bruta"></div>
+  </div>
+  <div class="grid3">
+    <div class="fld"><label>Espessura (cm)</label><input class="input" value="5"></div>
+    <div class="fld"><label>Largura (cm)</label><input class="input" value="30"></div>
+    <div class="fld"><label>Comp. (m)</label><input class="input" value="3,00"></div>
+  </div>
+  <div class="gen-name">➜ "Pinus Bruta 5×30 3,00m"</div>
+  <div class="ok">✓ combinação disponível</div>
+  <div class="grid2" style="margin-top:14px">
+    <div class="fld"><label>Custo (R$)</label><input class="input" value="24,00"></div>
+    <div class="fld"><label>Preço (R$)</label><input class="input" value="38,00"></div>
+  </div>
+  <div class="muted" style="margin-bottom:14px">Margem: <b class="pos">R$ 14,00 (58%)</b></div>
+  <div class="fld"><label>Estoque mínimo</label><input class="input" value="30"></div>
+  <div class="muted" style="margin-bottom:18px">Estoque atual: <b>120 pç</b> (só leitura) · <a href="#">ver movimentos</a></div>
+  <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="closeDrawers()">Cancelar</button><button class="btn btn-primary" onclick="closeDrawers()">Salvar</button></div>
+</div>
+<div class="drawer" id="drawer-func">
+  <h2>Funcionário</h2>
+  <div class="fld"><label>Nome</label><input class="input" value="Zé" style="width:100%"></div>
+  <div class="fld"><label>Funções</label><div class="chips"><span class="chip">Cortador ✕</span><span class="chip">Motorista ✕</span><span class="chip" style="background:var(--bg);color:var(--muted)">+ adicionar</span></div></div>
+  <div class="fld"><label>Telefone</label><input class="input" value="(11) 9..." style="width:100%"></div>
+  <div class="fld"><label>✓ Ativo</label></div>
+  <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="closeDrawers()">Cancelar</button><button class="btn btn-primary" onclick="closeDrawers()">Salvar</button></div>
+</div>
+
+<script>
+  function show(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    var nav=document.querySelector('.nav-item[data-nav="'+id+'"]');
+    if(nav)nav.classList.add('active');
+    document.querySelector('.content').scrollTop=0;
+  }
+  function setSub(group,name){
+    var map={vendas:['lista','editor'],fin:['visao','receber','pagar','caixa']};
+    var prefix={vendas:'vendas-',fin:'fin-'}[group];
+    map[group].forEach(n=>{
+      document.getElementById(prefix+n).classList.remove('active');
+    });
+    document.getElementById(prefix+name).classList.add('active');
+    // tabs
+    document.querySelectorAll('#'+(group==='fin'?'financeiro':group)+' .tab').forEach(t=>t.classList.remove('active'));
+    var tab=document.querySelector('.tab[data-sub="'+prefix+name+'"]');
+    if(tab)tab.classList.add('active');
+    if(group==='vendas')show('vendas');
+  }
+  function openDrawer(id){document.getElementById('overlay').classList.add('open');document.getElementById(id).classList.add('open');}
+  function closeDrawers(){document.getElementById('overlay').classList.remove('open');document.querySelectorAll('.drawer').forEach(d=>d.classList.remove('open'));}
+</script>
+</body>
+</html>
