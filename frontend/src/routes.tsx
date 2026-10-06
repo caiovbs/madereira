@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { InicioDashboard } from '@/pages/inicio/InicioDashboard'
 import { VendasPage } from '@/pages/vendas/VendasPage'
+import { VendaEditorPage } from '@/pages/vendas/VendaEditorPage'
 import { EstoquePage } from '@/pages/estoque/EstoquePage'
 import { ComprasPage } from '@/pages/compras/ComprasPage'
 import { PatioPage } from '@/pages/patio/PatioPage'
@@ -19,6 +20,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <InicioDashboard /> },
       { path: 'vendas', element: <VendasPage /> },
+      { path: 'vendas/nova', element: <VendaEditorPage /> },
+      { path: 'vendas/:id', element: <VendaEditorPage /> },
       { path: 'estoque', element: <EstoquePage /> },
       { path: 'compras', element: <ComprasPage /> },
       { path: 'patio', element: <PatioPage /> },
