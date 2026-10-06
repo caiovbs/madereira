@@ -1,17 +1,15 @@
-/* eslint-disable @typescript-eslint/no-base-to-string */
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { Request } from 'express';
+import type { FastifyRequest } from 'fastify';
 import { PaginationParams } from '../types';
 
 export const GetPagination = createParamDecorator(
   (_data, ctx: ExecutionContext): PaginationParams => {
-    const req: Request = ctx.switchToHttp().getRequest();
+    const req = ctx.switchToHttp().getRequest<FastifyRequest>();
+    const query = req.query as Record<string, string | undefined>;
 
     return {
-      page: req.query.page ? Number.parseInt(req.query.page.toString(), 10) : 1,
-      pageSize: req.query.pageSize
-        ? Number.parseInt(req.query.pageSize.toString(), 10)
-        : 100,
+      page: query.page ? Number.parseInt(query.page, 10) : 1,
+      pageSize: query.pageSize ? Number.parseInt(query.pageSize, 10) : 100,
     };
   },
 );
