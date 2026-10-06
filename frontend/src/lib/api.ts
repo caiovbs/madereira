@@ -7,8 +7,9 @@ export const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    const message =
-      err.response?.data?.message ?? err.response?.data?.errorMessage ?? 'Erro inesperado.'
+    const message = !err.response
+      ? 'Não foi possível conectar à API.'
+      : err.response.data?.message ?? err.response.data?.errorMessage ?? 'Erro inesperado.'
     return Promise.reject(new Error(message))
   },
 )

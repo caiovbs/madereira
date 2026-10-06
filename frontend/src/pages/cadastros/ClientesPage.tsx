@@ -1,10 +1,15 @@
-import { CadastroList } from './CadastroList'
+import { clientesApi } from '@/api/cadastros'
+import { CadastroList, type FieldDef } from './CadastroList'
+
+const fields: FieldDef[] = [
+  { name: 'nome', label: 'Nome', required: true, maxLength: 150 },
+  { name: 'telefone', label: 'Telefone', maxLength: 20 },
+  { name: 'endereco', label: 'Endereço', maxLength: 255 },
+  { name: 'documento', label: 'CPF/CNPJ', maxLength: 30 },
+]
 
 export function ClientesPage() {
-  return <CadastroList title="Clientes" singular="cliente" description="Pessoas e empresas disponíveis para novas vendas." rows={[
-    { title: 'João Silva', detail: '(11) 99872-4451 · Rua das Palmeiras, 100' },
-    { title: 'Construtora Horizonte', detail: '(11) 3244-1180 · Av. Industrial, 820' },
-    { title: 'Maria Oliveira', detail: '(11) 99122-3009 · Estrada do Campo, km 4' },
-    { title: 'Oficina Matos', detail: '(11) 3118-7310 · Rua das Oficinas, 45', status: 'Inativo' },
-  ]} summary={<><h2>Carteira de clientes</h2><p>Dados de contato e endereço ficam disponíveis ao iniciar uma nova venda.</p><dl><div><dt>Clientes ativos</dt><dd>128</dd></div><div><dt>Com compra no mês</dt><dd>37</dd></div><div><dt>Novos este mês</dt><dd>9</dd></div></dl></>} />
+  return <CadastroList title="Clientes" singular="cliente" description="Pessoas e empresas disponíveis para novas vendas." resource={clientesApi} fields={fields}
+    getRow={(c) => ({ title: c.nome, detail: [c.telefone, c.endereco].filter(Boolean).join(' · ') || 'Sem contato' })}
+    summary="Dados de contato e endereço ficam disponíveis ao iniciar uma nova venda." />
 }
