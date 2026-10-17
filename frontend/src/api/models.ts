@@ -84,6 +84,9 @@ export interface Entrega {
   observacao: string | null
   dataAgendada: string | null
   turno: Turno | null
+  latitude: number | null
+  longitude: number | null
+  ordemRota: number | null
   carregadoEm: string | null
   saiuEm: string | null
   entregueEm: string | null
@@ -97,6 +100,59 @@ export interface EntregaInput {
   observacao?: string
   dataAgendada?: string
   turno?: Turno
+  latitude?: number
+  longitude?: number
+}
+
+export interface ParadaRota {
+  ordem: number
+  entregaId: string
+  vendaNumero: number
+  cliente: string
+  endereco: string
+  turno: Turno | null
+  status: EntregaStatus
+  caminhaoId: string | null
+  motoristaId: string | null
+  latitude: number
+  longitude: number
+  /** deslocamento do ponto anterior até esta parada */
+  distanciaKm: number
+  duracaoMin: number
+  /** tempo estimado para descarregar (a entrega só termina depois) */
+  descargaMin: number
+  pecas: number
+  volumeM3: number
+  /** espera até o turno da tarde começar */
+  esperaMin: number
+  chegadaPrevista: string
+  fimPrevisto: string
+  /** turno da manhã que passa do fim da manhã */
+  passaDoTurno: boolean
+}
+
+export interface RotaDoDia {
+  data: string
+  deposito: { nome: string; endereco: string; latitude: number; longitude: number }
+  paradas: ParadaRota[]
+  semLocalizacao: { entregaId: string; vendaNumero: number; cliente: string; endereco: string | null; motivo: string }[]
+  retorno: { distanciaKm: number; duracaoMin: number }
+  total: {
+    paradas: number
+    distanciaKm: number
+    /** só dirigindo */
+    duracaoMin: number
+    descargaMin: number
+    esperaMin: number
+    /** saída → retorno: dirigindo + descarga + esperas */
+    jornadaMin: number
+    saida: string
+    retornoPrevisto: string
+  }
+  /** otimizada = sugestão ainda não salva; salva = ordem já aplicada */
+  origemOrdem: 'otimizada' | 'salva'
+  aproximado: boolean
+  geometria: [number, number][]
 }
 
 export interface Lancamento {

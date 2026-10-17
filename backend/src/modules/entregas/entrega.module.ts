@@ -3,12 +3,16 @@ import { EntregaController } from './controllers';
 import { EntregaService } from './services';
 import { EntregaRepository } from './repositories';
 import { EntregaUseCaseHandlers } from './use-cases';
+import { RotaController } from './rota/rota.controller';
+import { RotaService } from './rota/rota.service';
+import { GeocodingService } from './rota/geocoding.service';
+import { RoutingService } from './rota/routing.service';
 
 const exposedProviders: Provider[] = [EntregaRepository];
-const unexposedProviders: Provider[] = [EntregaService];
+const unexposedProviders: Provider[] = [EntregaService, RotaService, GeocodingService, RoutingService];
 
 @Module({
-  controllers: [EntregaController],
+  controllers: [RotaController, EntregaController],
   providers: [...exposedProviders, ...unexposedProviders, ...EntregaUseCaseHandlers],
   exports: [...exposedProviders],
 })

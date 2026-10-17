@@ -62,7 +62,7 @@ Por padrão o front aponta para `http://localhost:3000`; para mudar, defina `VIT
 - **Vendas**: orçamento e venda na mesma tela; o orçamento é um rascunho que pode ser retomado. Itens com instruções de corte/aparelhamento, frete e desconto.
 - **Compras**: pedido → recebida. Ao receber, soma o estoque, atualiza o custo e gera o valor a pagar.
 - **Pátio**: fila de tarefas de preparo (cortar, aparelhar, separar) geradas pelas vendas.
-- **Entregas**: painel com status (a carregar → carregado → em rota → entregue), travado até o pátio concluir o preparo.
+- **Entregas**: painel com status (a carregar → carregado → em rota → entregue), travado até o pátio concluir o preparo. A visão **Rota do dia** mostra no mapa as entregas agendadas, sugere a ordem de menor distância (manhã antes da tarde, com retorno à madeireira), traça o caminho pelas ruas e permite ajustar a ordem e a posição dos pinos. Usa só serviços gratuitos (OpenStreetMap/OSRM); ver variáveis `DEPOSITO_*` em `backend/.env.example`.
 - **Financeiro**: saldo do caixa, contas a receber e a pagar, despesas avulsas.
 - **Cadastros**: clientes, fornecedores, funcionários, caminhões e tipos de madeira.
 

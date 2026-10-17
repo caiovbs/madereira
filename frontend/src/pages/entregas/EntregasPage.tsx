@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
-import { Search } from 'lucide-react'
+import { Map as MapIcon, Search, Truck } from 'lucide-react'
 import { PageHeader, StatusBadge } from '@/components/operations'
 import { funcionariosApi } from '@/api/cadastros'
 import { useAvancarEntrega, useEntregas, useTarefas, useVendas } from '@/api/operacoes'
@@ -9,12 +9,14 @@ import type { Entrega } from '@/api/models'
 import type { EntregaStatus } from '@/api/types'
 import { ENTREGA_LABEL, TURNO_LABEL, formatDate, formatTime, norm } from '@/lib/format'
 import { EntregaDialog } from './EntregaDialog'
+import { RotaDoDia } from './RotaDoDia'
 
 const COLUNAS: EntregaStatus[] = ['a_carregar', 'carregado', 'em_rota', 'entregue']
 const PROXIMA: Partial<Record<EntregaStatus, string>> = { a_carregar: 'Carregado', carregado: 'Em rota', em_rota: 'Entregue' }
 const ENTREGUES_VISIVEIS = 10
 
 export function EntregasPage() {
+  const [visao, setVisao] = useState<'quadro' | 'rota'>('quadro')
   const [motoristaId, setMotoristaId] = useState('')
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState<Entrega | null>(null)
@@ -66,6 +68,11 @@ export function EntregasPage() {
   const loading = entregas.isLoading || vendas.isLoading
   return <div className="page-stack">
     <PageHeader eyebrow="Expedição" title="Entregas" description="Acompanhe a carga e o deslocamento. A entrega só pode ser carregada depois que o pátio concluir o preparo." />
+    <div className="segmented-choice visao-toggle" role="tablist" aria-label="Visão">
+      <button type="button" role="tab" aria-selected={visao === 'quadro'} className={visao === 'quadro' ? 'active' : ''} onClick={() => setVisao('quadro')}><Truck size={14} /> Quadro</button>
+      <button type="button" role="tab" aria-selected={visao === 'rota'} className={visao === 'rota' ? 'active' : ''} onClick={() => setVisao('rota')}><MapIcon size={14} /> Rota do dia</button>
+    </div>
+    {visao === 'rota' ? <RotaDoDia /> : <>
     <div className="toolbar">
       <select className="filter-button" value={motoristaId} onChange={(e) => setMotoristaId(e.target.value)} aria-label="Filtrar por motorista"><option value="">Todos os motoristas</option>{motoristas.data?.map((m) => <option key={m.id} value={m.id}>{m.nome}</option>)}</select>
       <label className="search-field"><Search size={16} /><input placeholder="Buscar entrega ou cliente" value={search} onChange={(e) => setSearch(e.target.value)} /></label>
@@ -78,6 +85,7 @@ export function EntregasPage() {
         return <Column key={s} title={ENTREGA_LABEL[s]} count={items.length}>{visiveis.length === 0 ? <p className="empty-state">Vazio</p> : visiveis.map(card)}{items.length > visiveis.length && <p className="muted" style={{ marginTop: 12, fontSize: 12 }}>+ {items.length - visiveis.length} anteriores</p>}</Column>
       })}
     </section>}
+    </>}
     <EntregaDialog entrega={editing} enderecoPadrao={editingInfo?.cliente?.endereco ?? undefined} titulo={editingInfo ? `Venda #${editingInfo.venda?.numero ?? ''} · ${editingInfo.nome}` : ''} onClose={() => setEditing(null)} />
   </div>
 }

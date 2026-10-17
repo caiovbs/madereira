@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 import { api, extractData } from '@/lib/api'
 import type { ListParams } from './resource'
 import type {
-  Caixa, Compra, Entrega, EntregaInput, Lancamento, LancamentoAvulsoInput, TarefaPatio, Venda, VendaInput,
+  Caixa, Compra, Entrega, EntregaInput, Lancamento, LancamentoAvulsoInput, RotaDoDia, TarefaPatio, Venda, VendaInput,
 } from './models'
 import type { CompraInput, ReceberCompraInput } from './types'
 
@@ -34,6 +34,7 @@ function useAction<TVars, TRes>(fn: (vars: TVars) => Promise<TRes>, roots: strin
 }
 
 const post = async <T>(path: string, body?: unknown) => extractData<T>(await api.post(path, body))
+const axiosPut = async <T>(path: string, body: unknown) => extractData<T>(await api.put(path, body))
 const patch = async <T>(path: string, body: unknown) => extractData<T>(await api.patch(path, body))
 
 // ── Vendas ───────────────────────────────────────────────────────────────
@@ -67,6 +68,12 @@ export const useConcluirTarefa = () =>
 export const useEntregas = (params?: ListParams) => useGet<Entrega[]>('entregas', '/entregas', { pageSize: 500, ...params })
 export const useUpdateEntrega = () =>
   useAction(({ id, data }: { id: string; data: EntregaInput }) => patch<Entrega>(`/entregas/${id}`, data), ['entregas'], 'Entrega atualizada.')
+/** Rota do dia: pontos, ordem e traçado. `otimizar` ignora a ordem salva e sugere uma nova (sem gravar). */
+export const useRota = (params: { data: string; caminhaoId?: string; saida?: string; otimizar?: boolean }) =>
+  useGet<RotaDoDia>('entregas', '/entregas/rota', { ...params, otimizar: params.otimizar ? 'true' : undefined }, !!params.data)
+export const useSalvarOrdemRota = () =>
+  useAction((ids: string[]) => axiosPut<{ salvas: number }>('/entregas/rota/ordem', { ids }), ['entregas'])
+
 export const useAvancarEntrega = () =>
   useAction((id: string) => post<Entrega>(`/entregas/${id}/avancar`), ['entregas'])
 

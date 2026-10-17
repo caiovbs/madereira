@@ -32,10 +32,22 @@ export class EntregaRepository extends BaseRepositoryPrisma(Entrega, 'entrega') 
       data.caminhao = input.caminhaoId ? { connect: { id: input.caminhaoId } } : { disconnect: true };
     if (input.motoristaId !== undefined)
       data.motorista = input.motoristaId ? { connect: { id: input.motoristaId } } : { disconnect: true };
-    if (input.endereco !== undefined) data.endereco = input.endereco;
+    if (input.endereco !== undefined) {
+      data.endereco = input.endereco;
+      // Endereço novo: a posição antiga não vale mais (será geocodificada de novo ao montar a rota).
+      data.latitude = null;
+      data.longitude = null;
+    }
+    if (input.latitude !== undefined && input.longitude !== undefined) {
+      data.latitude = input.latitude;
+      data.longitude = input.longitude;
+    }
     if (input.observacao !== undefined) data.observacao = input.observacao;
     if (input.dataAgendada !== undefined) data.dataAgendada = new Date(input.dataAgendada);
     if (input.turno !== undefined) data.turno = input.turno;
+    // Mudou o dia, o caminhão ou o turno: a posição na rota antiga deixa de valer.
+    if (input.dataAgendada !== undefined || input.caminhaoId !== undefined || input.turno !== undefined)
+      data.ordemRota = null;
     return this.format(await this.delegate.update({ where: { id }, data }));
   }
 
