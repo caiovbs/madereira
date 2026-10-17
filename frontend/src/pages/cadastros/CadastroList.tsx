@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Plus, Search } from 'lucide-react'
+import { Pencil, PowerOff, Plus, RotateCcw, Search } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { PageHeader, StatusBadge } from '@/components/operations'
 import { Field, FormDialog } from '@/components/FormDialog'
@@ -81,9 +81,11 @@ export function CadastroList<T extends Row>({ title, description, singular, reso
               <div className="directory-main"><h3>{row.title}</h3><p>{row.detail}</p></div>
               <div className="tag-list">{row.tags?.map((tag) => <span className="tag" key={tag}>{tag}</span>)}</div>
               <StatusBadge tone={item.ativo ? 'success' : 'neutral'}>{item.ativo ? 'Ativo' : 'Inativo'}</StatusBadge>
-              <div className="page-actions">
-                <button className="button button-ghost" type="button" onClick={() => setEditing(item)}>Editar</button>
-                <button className="button button-ghost" type="button" onClick={() => toggleAtivo(item)} disabled={update.isPending}>{item.ativo ? 'Inativar' : 'Reativar'}</button>
+              <div className="row-actions">
+                <button className="row-action" type="button" title="Editar" aria-label={`Editar ${row.title}`} onClick={() => setEditing(item)}><Pencil size={16} /></button>
+                <button className={`row-action${item.ativo ? ' danger' : ''}`} type="button" title={item.ativo ? 'Inativar' : 'Reativar'} aria-label={`${item.ativo ? 'Inativar' : 'Reativar'} ${row.title}`} onClick={() => toggleAtivo(item)} disabled={update.isPending}>
+                  {item.ativo ? <PowerOff size={16} /> : <RotateCcw size={16} />}
+                </button>
               </div>
             </article>
           })}
