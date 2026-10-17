@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Turno } from '@prisma/client';
-import { IsDateString, IsEnum, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
 
 export class UpdateEntregaDto {
   @ApiPropertyOptional()
@@ -34,4 +34,18 @@ export class UpdateEntregaDto {
   @IsOptional()
   @IsEnum(Turno)
   turno?: Turno;
+
+  @ApiPropertyOptional({ description: 'Posição no mapa; use para corrigir um endereço geocodificado errado.' })
+  @IsOptional()
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  latitude?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  longitude?: number;
 }

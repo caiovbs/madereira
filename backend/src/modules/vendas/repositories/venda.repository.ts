@@ -76,8 +76,10 @@ export class VendaRepository extends BaseRepositoryPrisma(Venda, 'venda') {
 
     if (itensComPreco !== undefined) {
       const subtotal = itensComPreco.reduce((s, i) => s + i.subtotalLinha, 0)
-      const frete = input.frete ?? 0
-      const desconto = input.desconto ?? 0
+      // Quem não reenviou frete/desconto mantém os valores já gravados no orçamento.
+      const current = await this.delegate.findUnique({ where: { id } })
+      const frete = input.frete ?? Number(current.frete)
+      const desconto = input.desconto ?? Number(current.desconto)
       data.subtotal = subtotal
       data.frete = frete
       data.desconto = desconto

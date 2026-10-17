@@ -324,6 +324,9 @@ model Entrega {
   observacao   String?
   dataAgendada DateTime?     @db.Date
   turno        Turno?
+  latitude     Float? // geocodificado do endereço; ajustável no mapa
+  longitude    Float?
+  ordemRota    Int? // posição na rota do dia (1 = primeira parada)
   carregadoEm  DateTime?     @db.Timestamptz(6)
   saiuEm       DateTime?     @db.Timestamptz(6)
   entregueEm   DateTime?     @db.Timestamptz(6)

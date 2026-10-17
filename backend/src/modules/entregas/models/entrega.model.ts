@@ -10,6 +10,9 @@ export class Entrega extends Entity {
   observacao: string | null;
   dataAgendada: Date | null;
   turno: Turno | null;
+  latitude: number | null;
+  longitude: number | null;
+  ordemRota: number | null;
   carregadoEm: Date | null;
   saiuEm: Date | null;
   entregueEm: Date | null;
