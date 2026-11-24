@@ -26,7 +26,7 @@ terraform {
   required_providers { aws = { source = "hashicorp/aws", version = "~> 5.0" } }
 }
 
-provider "aws" { region = "us-east-1" } # sa-east-1 também funciona
+provider "aws" { region = "us-east-2" } # região do projeto; na nova experiência não dá para usar outra
 
 variable "meu_ip" { description = "seu IP público/32" }
 variable "email"  { description = "para o alerta de custo" }
