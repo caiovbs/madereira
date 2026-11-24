@@ -4,7 +4,7 @@ App web de gestão para madeireira: estoque, vendas/orçamentos, compras, pátio
 
 O ciclo central do MVP: **cadastrar madeira → orçar/vender → baixar estoque → preparar no pátio → entregar → receber**. Ao fechar uma venda, o sistema baixa o estoque, gera as tarefas do pátio, cria a entrega e lança o valor no financeiro, tudo numa única transação.
 
-> **Status:** em desenvolvimento, só para estudo. O backend tem todos os módulos do MVP e o frontend já consome a API em todas as telas. Ainda faltam login/autenticação, testes (inclusive do fechamento de venda) e CI. O deploy na AWS está só planejado ([docs/deploy-aws.md](docs/deploy-aws.md)).
+> **Status:** em desenvolvimento, só para estudo. O backend tem todos os módulos do MVP e o frontend já consome a API em todas as telas. Há CI no GitHub Actions (lint, typecheck, build, migrations e um smoke test do fluxo completo pela API). Ainda faltam login/autenticação e testes automatizados de verdade (hoje só o smoke test cobre o fechamento de venda). O deploy na AWS está só planejado ([docs/deploy-aws.md](docs/deploy-aws.md)).
 
 ## Stack
 
@@ -55,6 +55,22 @@ npm run dev
 ```
 
 Por padrão o front aponta para `http://localhost:3000`; para mudar, defina `VITE_API_URL`.
+
+**4. Dados e testes** (com a API rodando, a partir de `backend/`)
+
+```bash
+node scripts/seed.mjs    # popula com dados de exemplo
+node scripts/smoke.mjs   # teste de integração do fluxo completo pela API
+```
+
+## CI
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) roda em todo PR e em push no `main`:
+
+- **Backend:** lint, typecheck, testes unitários e build; aplica as migrations num Postgres 16 e falha se o `schema.prisma` tiver mudança sem migration; sobe a API, roda o seed e o smoke test.
+- **Frontend:** oxlint e build (`tsc -b` + Vite).
+
+No CI, a geocodificação e as rotas da Rota do dia usam um mock local ([`backend/scripts/mock-geo.mjs`](backend/scripts/mock-geo.mjs)) no lugar do Nominatim, Photon e OSRM. Para usar o mock localmente, rode `node scripts/mock-geo.mjs` e defina `NOMINATIM_URL`, `PHOTON_URL` e `OSRM_URL` como `http://localhost:3999`.
 
 ## Módulos
 

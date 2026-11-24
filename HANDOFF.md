@@ -24,15 +24,25 @@ App web de gestão de madeireira: estoque, vendas e orçamentos, compras, pátio
 
 ### Situação atual (avaliada em 24/11/2026)
 
-- O `main` está no merge do PR #6. Só existe a branch `main`, local e no origin; as branches mergeadas foram apagadas.
-- PRs já mergeados: #2 (plano de deploy na AWS), #3 (`CLAUDE.md`), #4 (este handoff), #5 (`CLAUDE.local.md` no `.gitignore`) e #6 (região do plano de deploy → `us-east-2`).
+- O `main` está no merge do PR #8. Só existe a branch `main`, local e no origin; as branches mergeadas foram apagadas.
+- PRs já mergeados: #2 (plano de deploy na AWS), #3 (`CLAUDE.md`), #4 (este handoff), #5 (`CLAUDE.local.md` no `.gitignore`), #6 (região do plano de deploy → `us-east-2`), #7 (status do README e handoff) e #8 (CI).
 - O frontend já busca todos os dados na API; não há mock. A seção "Status" do README foi atualizada.
 - Existe um `tmp.js` não rastreado na raiz, do usuário; não mexer nele.
 - **Pendências conhecidas:**
   1. **Não existe login nem autenticação.** O backend não tem nenhum guard.
-  2. **Quase não há testes:** só o `backend/src/app.controller.spec.ts` gerado pelo Nest. A transação de fechar venda não tem teste.
-  3. **Não há CI:** não existe `.github/`.
-- Nenhum build ou typecheck foi rodado ainda nas sessões do Claude.
+  2. **Quase não há testes automatizados:** só o `backend/src/app.controller.spec.ts` gerado pelo Nest. O fechamento de venda só é coberto pelo smoke test (`scripts/smoke.mjs`, pela API), não por teste unitário ou de integração no jest.
+  3. **Lint do backend com 173 warnings:** as regras `no-unsafe-*` estão como warning (TODO no `eslint.config.mjs`) até os repositórios com delegates do Prisma serem tipados.
+
+### CI (GitHub Actions, PR #8)
+
+- `.github/workflows/ci.yml`: roda em todo PR e em push no `main`, com dois jobs.
+  - **Backend** (Node 22 + Postgres 16 como service): `npm ci`, `prisma generate`, `lint:check`, `typecheck`, jest, build, `prisma migrate deploy`, `prisma migrate diff --exit-code` (falha se o schema tiver mudança sem migration) e, num único passo, sobe o mock-geo e a API, roda `seed.mjs` e `smoke.mjs` (62 verificações).
+  - **Frontend:** `npm ci`, oxlint e `npm run build`.
+- **Sem serviços externos no CI:** `backend/scripts/mock-geo.mjs` imita Nominatim, Photon e OSRM na porta 3999 (respostas determinísticas). A API aponta para ele via `NOMINATIM_URL`, `PHOTON_URL` e `OSRM_URL`; sem essas variáveis, usa os serviços públicos.
+- O smoke test cria os próprios dados de teste ("ZZ Teste", "ZZ Teste Rota 1–3") e passa num banco vazio.
+- O `.prettierrc` do backend foi alinhado ao código (`semi: true`, `trailingComma: all`). Scripts novos no backend: `lint:check`, `format:check` e `typecheck`.
+- **Ainda não há CD:** build de imagens e deploy entram junto com os Dockerfiles e o Terraform.
+- Para testar o fluxo do CI localmente sem mexer no banco do usuário: Postgres descartável em outra porta (ex.: `docker run --rm -p 55432:5432 postgres:16-alpine`) e API em outra porta (`PORT=3100`, `API_URL=http://localhost:3100` para os scripts).
 
 ## Ambiente local do usuário (Windows 11)
 
@@ -115,7 +125,7 @@ Foi extraído do frontend e publicado como artifact no claude.ai: **https://clau
   - instalar o Terraform (ainda não está na máquina);
   - conferir se o provider AWS do Terraform aceita as credenciais do `aws login` com o profile `madereira`;
   - criar de fato `infra/`, os Dockerfiles e `deploy/`;
-  - opcional: GitHub Actions para buildar as imagens fora da `t3.micro`.
+  - CD: estender o GitHub Actions para buildar as imagens fora da `t3.micro` (ex.: publicar no GHCR, grátis para repo público).
 
 ## Backlog sugerido (ainda não iniciado)
 
@@ -127,4 +137,5 @@ Foi extraído do frontend e publicado como artifact no claude.ai: **https://clau
 2. Criar o `.claude/settings.json` com permissões: liberar lint e test, bloquear `prisma migrate reset` e a leitura do `.env`.
 3. Criar hooks: lint depois de cada edição e bloqueio de push no `main`.
 4. Criar a skill `/novo-modulo`, que gera um módulo Nest no padrão do projeto.
-5. Implementar autenticação, testes do fechamento de venda e CI (lint, typecheck e build). Opcional: `commitlint` + `husky` e uma Action para validar o título dos PRs.
+5. Implementar autenticação e testes do fechamento de venda no jest (o CI já existe). Opcional: `commitlint` + `husky` e uma Action para validar o título dos PRs.
+6. Tipar os repositórios do Prisma e voltar as regras `no-unsafe-*` para `error`.
