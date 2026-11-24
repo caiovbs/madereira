@@ -63,8 +63,14 @@ jobs:
 
       # O smoke test conta com os dados do seed (ex.: clientes com endereço em Jundiaí
       # para a Rota do dia), então o banco vazio do CI é populado antes.
-      - name: Seed + smoke test (API + Postgres)
+      # Geocodificação e rotas vão para o mock local (scripts/mock-geo.mjs), não para a internet.
+      - name: Seed + smoke test (API + Postgres + mock-geo)
+        env:
+          NOMINATIM_URL: http://localhost:3999
+          PHOTON_URL: http://localhost:3999
+          OSRM_URL: http://localhost:3999
         run: |
+          node scripts/mock-geo.mjs > mock-geo.log 2>&1 &
           node dist/main > api.log 2>&1 &
           for i in $(seq 1 30); do
             curl -sf http://localhost:3000/docs > /dev/null && break
@@ -74,7 +80,7 @@ jobs:
           node scripts/smoke.mjs
       - name: API log
         if: failure()
-        run: cat api.log || true
+        run: cat api.log mock-geo.log || true
 
   frontend:
     name: Frontend

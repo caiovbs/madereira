@@ -113,7 +113,20 @@ await rejeita('despesa avulsa com valor negativo é recusada',
 
 console.log('Rota do dia (mapa e ordem das paradas)');
 const dia = isoDay(60 + Math.floor(Math.random() * 3000)); // dia futuro aleatório: isolado, não mexe na rota de hoje
-const comEndereco = (await must(get('/clientes'), 'clientes')).filter((c) => c.endereco && /Jundiaí/.test(c.endereco)).slice(0, 3);
+// Usa clientes com endereço em Jundiaí (ex.: os do seed após agendar-hoje.mjs); num banco vazio, como o do CI,
+// cria os próprios clientes de teste ("ZZ Teste Rota N") para não depender de nenhum outro script.
+const ENDERECOS_ROTA = [
+  'Avenida Jundiaí, 1200 - Anhangabaú, Jundiaí - SP',
+  'Rua Barão de Jundiaí, 85 - Centro, Jundiaí - SP',
+  'Avenida Nove de Julho, 560 - Vila Rio Branco, Jundiaí - SP',
+];
+let comEndereco = (await must(get('/clientes'), 'clientes')).filter((c) => c.endereco && /Jundiaí/.test(c.endereco)).slice(0, 3);
+for (let i = comEndereco.length; i < ENDERECOS_ROTA.length; i++) {
+  const endereco = ENDERECOS_ROTA[i];
+  const nome = `ZZ Teste Rota ${i + 1}`;
+  const existente = (await must(get(`/clientes?search=${encodeURIComponent(nome)}`), 'cliente rota')).find((c) => c.nome === nome);
+  comEndereco = [...comEndereco, existente ?? (await must(post('/clientes', { nome, endereco }), 'cliente rota'))];
+}
 const criadas = [];
 let qtdRota = 0;
 for (const [i, c] of comEndereco.entries()) {
