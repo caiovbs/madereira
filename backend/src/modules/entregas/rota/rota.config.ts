@@ -10,7 +10,8 @@ export interface Deposito {
 export function getDeposito(): Deposito {
   return {
     nome: process.env.DEPOSITO_NOME ?? 'Madeireira Santa Mônica',
-    endereco: process.env.DEPOSITO_ENDERECO ?? 'Av. Marginal da Via Anhanguera, 981 - Retiro, Jundiaí/SP',
+    endereco:
+      process.env.DEPOSITO_ENDERECO ?? 'Av. Marginal da Via Anhanguera, 981 - Retiro, Jundiaí/SP',
     latitude: Number(process.env.DEPOSITO_LAT ?? -23.19116),
     longitude: Number(process.env.DEPOSITO_LNG ?? -46.90702),
   };

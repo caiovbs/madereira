@@ -36,7 +36,10 @@ export function ordenarCaminho(
     let melhorCusto = Infinity;
     for (const n of restantes) {
       const c = custo(atual, n);
-      if (c < melhorCusto) { melhorCusto = c; melhor = n; }
+      if (c < melhorCusto) {
+        melhorCusto = c;
+        melhor = n;
+      }
     }
     restantes.delete(melhor);
     ordem.push(melhor);
@@ -53,8 +56,10 @@ export function ordenarCaminho(
       for (let j = i + 1; j <= ultimoMovel; j++) {
         const temProximo = j + 1 < p.length;
         const delta =
-          custo(p[i - 1], p[j]) + (temProximo ? custo(p[i], p[j + 1]) : 0) -
-          custo(p[i - 1], p[i]) - (temProximo ? custo(p[j], p[j + 1]) : 0);
+          custo(p[i - 1], p[j]) +
+          (temProximo ? custo(p[i], p[j + 1]) : 0) -
+          custo(p[i - 1], p[i]) -
+          (temProximo ? custo(p[j], p[j + 1]) : 0);
         if (delta < -1e-9) {
           p.splice(i, j - i + 1, ...p.slice(i, j + 1).reverse());
           melhorou = true;

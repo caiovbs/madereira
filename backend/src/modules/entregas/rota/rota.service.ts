@@ -108,7 +108,13 @@ export class RotaService {
       orderBy: { createdAt: 'asc' },
     });
 
-    const localizadas: Array<{ e: (typeof entregas)[number]; lat: number; lng: number; endereco: string; cliente: string }> = [];
+    const localizadas: Array<{
+      e: (typeof entregas)[number];
+      lat: number;
+      lng: number;
+      endereco: string;
+      cliente: string;
+    }> = [];
     const semLocalizacao: SemLocalizacao[] = [];
 
     for (const e of entregas) {
@@ -122,7 +128,10 @@ export class RotaService {
         if (achado) {
           lat = achado.latitude;
           lng = achado.longitude;
-          await this.prisma.entrega.update({ where: { id: e.id }, data: { latitude: lat, longitude: lng } });
+          await this.prisma.entrega.update({
+            where: { id: e.id },
+            data: { latitude: lat, longitude: lng },
+          });
         }
       }
 
@@ -140,18 +149,29 @@ export class RotaService {
     }
 
     const vazia = (): RotaDoDia => ({
-      data, deposito, paradas: [], semLocalizacao,
+      data,
+      deposito,
+      paradas: [],
+      semLocalizacao,
       retorno: { distanciaKm: 0, duracaoMin: 0 },
       total: {
-        paradas: 0, distanciaKm: 0, duracaoMin: 0, descargaMin: 0, esperaMin: 0, jornadaMin: 0,
-        saida: paraHora(saidaMin), retornoPrevisto: paraHora(saidaMin),
+        paradas: 0,
+        distanciaKm: 0,
+        duracaoMin: 0,
+        descargaMin: 0,
+        esperaMin: 0,
+        jornadaMin: 0,
+        saida: paraHora(saidaMin),
+        retornoPrevisto: paraHora(saidaMin),
       },
-      origemOrdem: 'salva', aproximado: false, geometria: [],
+      origemOrdem: 'salva',
+      aproximado: false,
+      geometria: [],
     });
     if (!localizadas.length) return vazia();
 
     // Ordem: a salva, se todas as paradas já têm posição; senão a sugerida.
-    const todasSalvas = localizadas.every((l) => l.e.ordemRota !== null);
+    const todasSalvas = localizadas.every(l => l.e.ordemRota !== null);
     const usarSalva = !otimizar && todasSalvas;
     let ordenadas = localizadas;
     let aproximado = false;
@@ -161,7 +181,7 @@ export class RotaService {
     } else {
       const pontos = [
         { latitude: deposito.latitude, longitude: deposito.longitude },
-        ...localizadas.map((l) => ({ latitude: l.lat, longitude: l.lng })),
+        ...localizadas.map(l => ({ latitude: l.lat, longitude: l.lng })),
       ];
       const { distancia, aproximado: aprox } = await this.routing.matriz(pontos);
       aproximado = aprox;
@@ -171,9 +191,9 @@ export class RotaService {
       // dentro de cada bloco, a menor distância. A rota termina de volta na madeireira.
       const idx = (l: (typeof localizadas)[number]) => localizadas.indexOf(l) + 1;
       const blocos = [
-        localizadas.filter((l) => l.e.turno !== 'tarde'),
-        localizadas.filter((l) => l.e.turno === 'tarde'),
-      ].filter((b) => b.length);
+        localizadas.filter(l => l.e.turno !== 'tarde'),
+        localizadas.filter(l => l.e.turno === 'tarde'),
+      ].filter(b => b.length);
 
       const ordemIdx: number[] = [];
       let inicio = 0;
@@ -183,17 +203,26 @@ export class RotaService {
         ordemIdx.push(...parte);
         inicio = parte[parte.length - 1];
       });
-      ordenadas = ordemIdx.map((i) => localizadas[i - 1]);
+      ordenadas = ordemIdx.map(i => localizadas[i - 1]);
     }
 
     const caminho = [
       { latitude: deposito.latitude, longitude: deposito.longitude },
-      ...ordenadas.map((l) => ({ latitude: l.lat, longitude: l.lng })),
+      ...ordenadas.map(l => ({ latitude: l.lat, longitude: l.lng })),
       { latitude: deposito.latitude, longitude: deposito.longitude },
     ];
     const tracado = await this.routing.tracado(caminho);
 
-    type Basica = Omit<ParadaRota, 'descargaMin' | 'pecas' | 'volumeM3' | 'esperaMin' | 'chegadaPrevista' | 'fimPrevisto' | 'passaDoTurno'>;
+    type Basica = Omit<
+      ParadaRota,
+      | 'descargaMin'
+      | 'pecas'
+      | 'volumeM3'
+      | 'esperaMin'
+      | 'chegadaPrevista'
+      | 'fimPrevisto'
+      | 'passaDoTurno'
+    >;
     const basicas: Basica[] = ordenadas.map((l, i) => ({
       ordem: i + 1,
       entregaId: l.e.id,
@@ -242,7 +271,11 @@ export class RotaService {
       Math.round(tracado.trechos.reduce((s, t) => s + t[k], 0) * 10) / 10;
 
     return {
-      data, deposito, paradas, semLocalizacao, retorno,
+      data,
+      deposito,
+      paradas,
+      semLocalizacao,
+      retorno,
       total: {
         paradas: paradas.length,
         distanciaKm: soma('distanciaKm'),
@@ -262,9 +295,11 @@ export class RotaService {
   /** Grava a sequência definida pelo usuário (1 = primeira parada). */
   async salvarOrdem(ids: string[]): Promise<{ salvas: number }> {
     const unicos = new Set(ids);
-    if (unicos.size !== ids.length) throw new BusinessRuleError('A lista de entregas tem itens repetidos.');
+    if (unicos.size !== ids.length)
+      throw new BusinessRuleError('A lista de entregas tem itens repetidos.');
     const existentes = await this.prisma.entrega.count({ where: { id: { in: ids } } });
-    if (existentes !== ids.length) throw new BusinessRuleError('Alguma das entregas informadas não existe.');
+    if (existentes !== ids.length)
+      throw new BusinessRuleError('Alguma das entregas informadas não existe.');
 
     await this.prisma.$transaction(
       ids.map((id, i) => this.prisma.entrega.update({ where: { id }, data: { ordemRota: i + 1 } })),

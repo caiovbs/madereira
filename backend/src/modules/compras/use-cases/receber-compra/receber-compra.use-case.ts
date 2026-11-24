@@ -1,5 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { CompraStatus, FormaPagamento, LancOrigem, LancSentido, LancSituacao, MovimentoOrigem, MovimentoSentido, StatusPagamentoCompra } from '@prisma/client';
+import {
+  CompraStatus,
+  FormaPagamento,
+  LancOrigem,
+  LancSentido,
+  LancSituacao,
+  MovimentoOrigem,
+  MovimentoSentido,
+  StatusPagamentoCompra,
+} from '@prisma/client';
 import { IUseCase } from '../../../../common/types';
 import { BusinessRuleError, ObjectNotFoundError } from '../../../../common/errors';
 import { PrismaService } from '../../../../prisma/prisma.service';
@@ -37,7 +46,7 @@ export class ReceberCompraUseCase implements IUseCase<ReceberCompraInput, Compra
         : StatusPagamentoCompra.a_pagar;
     const agora = new Date();
 
-    await this.prismaService.$transaction(async (tx) => {
+    await this.prismaService.$transaction(async tx => {
       for (const item of compra.itens) {
         await tx.movimentoEstoque.create({
           data: {

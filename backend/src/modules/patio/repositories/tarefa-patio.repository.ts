@@ -16,9 +16,7 @@ export class TarefaPatioRepository extends BaseRepositoryPrisma(TarefaPatio, 'ta
     if (filter.status) where.status = filter.status;
     if (filter.tipo) where.tipo = filter.tipo;
     if (filter.vendaId) where.vendaId = filter.vendaId;
-    return this.formatMany(
-      await this.delegate.findMany({ where, orderBy: { createdAt: 'asc' } }),
-    );
+    return this.formatMany(await this.delegate.findMany({ where, orderBy: { createdAt: 'asc' } }));
   }
 
   async concluir(id: string): Promise<TarefaPatio> {

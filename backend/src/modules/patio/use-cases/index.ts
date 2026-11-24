@@ -6,8 +6,4 @@ export * from './get-tarefas/get-tarefas.use-case';
 export * from './get-tarefa-by-id/get-tarefa-by-id.use-case';
 export * from './concluir-tarefa/concluir-tarefa.use-case';
 
-export const PatioUseCaseHandlers = [
-  GetTarefasUseCase,
-  GetTarefaByIdUseCase,
-  ConcluirTarefaUseCase,
-];
+export const PatioUseCaseHandlers = [GetTarefasUseCase, GetTarefaByIdUseCase, ConcluirTarefaUseCase];

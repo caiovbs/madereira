@@ -29,7 +29,7 @@ export class UpdateVendaUseCase implements IUseCase<UpdateVendaInput, Venda> {
     let itensComPreco: any[] | undefined;
     if (data.itens !== undefined) {
       itensComPreco = await Promise.all(
-        data.itens.map(async (item) => {
+        data.itens.map(async item => {
           const produto = await this.produtoRepository.getById(item.produtoId);
           if (!produto) throw new ObjectNotFoundError({ objectType: 'Produto', field: 'id' });
           const precoUnit = produto.preco;

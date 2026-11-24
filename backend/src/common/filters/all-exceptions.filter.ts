@@ -35,26 +35,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const isExpectedError = isHttpException || isDomainError;
 
     if (!isExpectedError) {
-      NestLogger.error(
-        exception?.message,
-        exception?.stack,
-        'AllExceptionsFilter',
-      );
+      NestLogger.error(exception?.message, exception?.stack, 'AllExceptionsFilter');
     }
 
-    const httpStatus = isExpectedError
-      ? exception.getStatus()
-      : HttpStatus.INTERNAL_SERVER_ERROR;
+    const httpStatus = isExpectedError ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const responseBody: ErrorResponse = {
       status: false,
       statusCode: httpStatus,
-      code: isExpectedError
-        ? this.getExceptionCode(exception, httpStatus)
-        : 'unknown',
-      message: isExpectedError
-        ? exception.message
-        : 'Algo inesperado aconteceu. Tente novamente.',
+      code: isExpectedError ? this.getExceptionCode(exception, httpStatus) : 'unknown',
+      message: isExpectedError ? exception.message : 'Algo inesperado aconteceu. Tente novamente.',
       errorMessage: exception?.message,
     };
 

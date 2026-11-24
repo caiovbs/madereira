@@ -1,1 +1,1 @@
-export * from './venda.module'
+export * from './venda.module';

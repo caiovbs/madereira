@@ -47,7 +47,9 @@ export class CreateCompraDto {
   @IsEnum(FormaPagamento)
   formaPagamento?: FormaPagamento;
 
-  @ApiPropertyOptional({ description: 'ISO date (YYYY-MM-DD). Obrigatório se formaPagamento=prazo.' })
+  @ApiPropertyOptional({
+    description: 'ISO date (YYYY-MM-DD). Obrigatório se formaPagamento=prazo.',
+  })
   @IsOptional()
   @IsDateString()
   vencimento?: string;
