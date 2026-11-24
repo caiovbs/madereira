@@ -61,13 +61,16 @@ jobs:
       - name: Check schema has no unmigrated changes
         run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
 
-      - name: Smoke test (API + Postgres)
+      # O smoke test conta com os dados do seed (ex.: clientes com endereço em Jundiaí
+      # para a Rota do dia), então o banco vazio do CI é populado antes.
+      - name: Seed + smoke test (API + Postgres)
         run: |
           node dist/main > api.log 2>&1 &
           for i in $(seq 1 30); do
             curl -sf http://localhost:3000/docs > /dev/null && break
             sleep 1
           done
+          node scripts/seed.mjs
           node scripts/smoke.mjs
       - name: API log
         if: failure()
