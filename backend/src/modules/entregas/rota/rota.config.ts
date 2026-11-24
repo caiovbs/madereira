@@ -19,6 +19,11 @@ export function getDeposito(): Deposito {
 
 export const getOsrmUrl = () => process.env.OSRM_URL ?? 'https://router.project-osrm.org';
 
+/** Geocodificadores (URLs base). Trocáveis para apontar para um próprio ou para o mock do CI. */
+export const getNominatimUrl = () =>
+  process.env.NOMINATIM_URL ?? 'https://nominatim.openstreetmap.org';
+export const getPhotonUrl = () => process.env.PHOTON_URL ?? 'https://photon.komoot.io';
+
 /** Acrescentado a endereços sem cidade/UF para a busca não cair em outra região. */
 export const getContextoEndereco = () => process.env.GEOCODE_CONTEXTO ?? 'Jundiaí, SP, Brasil';
 

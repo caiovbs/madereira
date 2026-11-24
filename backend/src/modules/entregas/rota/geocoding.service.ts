@@ -1,5 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RAIO_MAX_KM, getContextoEndereco, getDeposito } from './rota.config';
+import {
+  RAIO_MAX_KM,
+  getContextoEndereco,
+  getDeposito,
+  getNominatimUrl,
+  getPhotonUrl,
+} from './rota.config';
 import { haversineKm } from './ordenacao';
 
 export interface Coordenada {
@@ -67,7 +73,7 @@ export class GeocodingService {
     if (espera > 0) await new Promise(r => setTimeout(r, espera));
     this.ultimaChamadaNominatim = Date.now();
 
-    const url = `https://nominatim.openstreetmap.org/search?${new URLSearchParams({
+    const url = `${getNominatimUrl()}/search?${new URLSearchParams({
       q,
       format: 'jsonv2',
       limit: '1',
@@ -84,7 +90,7 @@ export class GeocodingService {
 
   private async photon(q: string): Promise<Coordenada | null> {
     const dep = getDeposito();
-    const url = `https://photon.komoot.io/api/?${new URLSearchParams({
+    const url = `${getPhotonUrl()}/api/?${new URLSearchParams({
       q,
       limit: '1',
       lat: String(dep.latitude),
