@@ -4,7 +4,7 @@ App web de gestão para madeireira: estoque, vendas/orçamentos, compras, pátio
 
 O ciclo central do MVP: **cadastrar madeira → orçar/vender → baixar estoque → preparar no pátio → entregar → receber**. Ao fechar uma venda, o sistema baixa o estoque, gera as tarefas do pátio, cria a entrega e lança o valor no financeiro, tudo numa única transação.
 
-> **Status:** em desenvolvimento. O backend tem todos os módulos do MVP; o frontend tem o layout e as telas, ainda com dados de exemplo (integração com a API em andamento). Login ainda não implementado.
+> **Status:** em desenvolvimento, só para estudo. O backend tem todos os módulos do MVP e o frontend já consome a API em todas as telas. Ainda faltam login/autenticação, testes (inclusive do fechamento de venda) e CI. O deploy na AWS está só planejado ([docs/deploy-aws.md](docs/deploy-aws.md)).
 
 ## Stack
 
