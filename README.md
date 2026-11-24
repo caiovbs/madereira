@@ -74,3 +74,4 @@ Por padrão o front aponta para `http://localhost:3000`; para mudar, defina `VIT
 - [Design das telas](docs/design.md)
 - [Arquitetura](docs/arquitetura.md)
 - [Protótipo navegável](docs/prototipo/index.html)
+- [Deploy na AWS (plano, free tier)](docs/deploy-aws.md)
