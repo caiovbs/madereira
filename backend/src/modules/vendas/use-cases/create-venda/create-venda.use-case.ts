@@ -15,7 +15,7 @@ export class CreateVendaUseCase implements IUseCase<CreateVendaDto, Venda> {
 
   async execute(input: CreateVendaDto): Promise<Venda> {
     const itensComPreco = await Promise.all(
-      input.itens.map(async (item) => {
+      input.itens.map(async item => {
         const produto = await this.produtoRepository.getById(item.produtoId);
         if (!produto) throw new ObjectNotFoundError({ objectType: 'Produto', field: 'id' });
         const precoUnit = produto.preco;

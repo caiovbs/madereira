@@ -10,13 +10,19 @@ export interface Deposito {
 export function getDeposito(): Deposito {
   return {
     nome: process.env.DEPOSITO_NOME ?? 'Madeireira Santa Mônica',
-    endereco: process.env.DEPOSITO_ENDERECO ?? 'Av. Marginal da Via Anhanguera, 981 - Retiro, Jundiaí/SP',
+    endereco:
+      process.env.DEPOSITO_ENDERECO ?? 'Av. Marginal da Via Anhanguera, 981 - Retiro, Jundiaí/SP',
     latitude: Number(process.env.DEPOSITO_LAT ?? -23.19116),
     longitude: Number(process.env.DEPOSITO_LNG ?? -46.90702),
   };
 }
 
 export const getOsrmUrl = () => process.env.OSRM_URL ?? 'https://router.project-osrm.org';
+
+/** Geocodificadores (URLs base). Trocáveis para apontar para um próprio ou para o mock do CI. */
+export const getNominatimUrl = () =>
+  process.env.NOMINATIM_URL ?? 'https://nominatim.openstreetmap.org';
+export const getPhotonUrl = () => process.env.PHOTON_URL ?? 'https://photon.komoot.io';
 
 /** Acrescentado a endereços sem cidade/UF para a busca não cair em outra região. */
 export const getContextoEndereco = () => process.env.GEOCODE_CONTEXTO ?? 'Jundiaí, SP, Brasil';

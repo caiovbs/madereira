@@ -16,10 +16,7 @@ const INCLUDE_ITENS = { itens: true } as const;
 @Injectable()
 export class CompraRepository extends BaseRepositoryPrisma(Compra, 'compra') {
   async create(input: CreateCompraDto): Promise<Compra> {
-    const total = input.itens.reduce(
-      (sum, item) => sum + item.quantidade * item.custoUnit,
-      0,
-    );
+    const total = input.itens.reduce((sum, item) => sum + item.quantidade * item.custoUnit, 0);
     const data = await this.delegate.create({
       data: {
         fornecedorId: input.fornecedorId ?? null,
@@ -27,7 +24,7 @@ export class CompraRepository extends BaseRepositoryPrisma(Compra, 'compra') {
         vencimento: input.vencimento ? new Date(input.vencimento) : null,
         total,
         itens: {
-          create: input.itens.map((item) => ({
+          create: input.itens.map(item => ({
             produtoId: item.produtoId,
             quantidade: item.quantidade,
             custoUnit: item.custoUnit,
@@ -47,14 +44,11 @@ export class CompraRepository extends BaseRepositoryPrisma(Compra, 'compra') {
     if (input.vencimento !== undefined) data.vencimento = new Date(input.vencimento);
 
     if (input.itens !== undefined) {
-      const total = input.itens.reduce(
-        (sum, item) => sum + item.quantidade * item.custoUnit,
-        0,
-      );
+      const total = input.itens.reduce((sum, item) => sum + item.quantidade * item.custoUnit, 0);
       data.total = total;
       data.itens = {
         deleteMany: {},
-        create: input.itens.map((item) => ({
+        create: input.itens.map(item => ({
           produtoId: item.produtoId,
           quantidade: item.quantidade,
           custoUnit: item.custoUnit,

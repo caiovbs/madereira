@@ -5,10 +5,7 @@ import { Caminhao } from '../../models';
 import { CreateCaminhaoDto } from '../../dto';
 
 @Injectable()
-export class CreateCaminhaoUseCase implements IUseCase<
-  CreateCaminhaoDto,
-  Caminhao
-> {
+export class CreateCaminhaoUseCase implements IUseCase<CreateCaminhaoDto, Caminhao> {
   constructor(private readonly repo: CaminhaoRepository) {}
 
   execute(input: CreateCaminhaoDto): Promise<Caminhao> {

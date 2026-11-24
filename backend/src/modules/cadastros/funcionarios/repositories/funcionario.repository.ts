@@ -26,8 +26,6 @@ export class FuncionarioRepository extends BaseRepositoryPrisma(Funcionario, 'fu
     if (filter.ativo !== undefined) where.ativo = filter.ativo;
     if (filter.funcao) where.funcoes = { has: filter.funcao };
     if (filter.search) where.nome = { contains: filter.search, mode: 'insensitive' };
-    return this.formatMany(
-      await this.delegate.findMany({ where, orderBy: { nome: 'asc' } }),
-    );
+    return this.formatMany(await this.delegate.findMany({ where, orderBy: { nome: 'asc' } }));
   }
 }

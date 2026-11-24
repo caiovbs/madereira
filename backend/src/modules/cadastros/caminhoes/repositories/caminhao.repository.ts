@@ -10,27 +10,19 @@ export interface GetCaminhoesFilter {
 }
 
 @Injectable()
-export class CaminhaoRepository extends BaseRepositoryPrisma(
-  Caminhao,
-  'caminhao',
-) {
+export class CaminhaoRepository extends BaseRepositoryPrisma(Caminhao, 'caminhao') {
   async create(input: CreateCaminhaoDto): Promise<Caminhao> {
     return this.format(await this.delegate.create({ data: input }));
   }
 
   async update(id: string, input: UpdateCaminhaoDto): Promise<Caminhao> {
-    return this.format(
-      await this.delegate.update({ where: { id }, data: input }),
-    );
+    return this.format(await this.delegate.update({ where: { id }, data: input }));
   }
 
   async getMany(filter: GetCaminhoesFilter): Promise<Caminhao[]> {
     const where: any = {};
     if (filter.ativo !== undefined) where.ativo = filter.ativo;
-    if (filter.search)
-      where.descricao = { contains: filter.search, mode: 'insensitive' };
-    return this.formatMany(
-      await this.delegate.findMany({ where, orderBy: { descricao: 'asc' } }),
-    );
+    if (filter.search) where.descricao = { contains: filter.search, mode: 'insensitive' };
+    return this.formatMany(await this.delegate.findMany({ where, orderBy: { descricao: 'asc' } }));
   }
 }

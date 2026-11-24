@@ -20,9 +20,14 @@ export function estimarDescarga(itens: ItemParaDescarga[]): Descarga {
   for (const i of itens) {
     const comprimentoM = Number(i.cortarParaM ?? i.produto.comprimentoEstoqueM);
     pecas += i.quantidade;
-    volumeM3 += (i.quantidade * Number(i.produto.espessuraCm) * Number(i.produto.larguraCm) * comprimentoM) / 10000;
+    volumeM3 +=
+      (i.quantidade * Number(i.produto.espessuraCm) * Number(i.produto.larguraCm) * comprimentoM) /
+      10000;
   }
-  const minutos = Math.max(1, Math.round(cfg.baseMin + pecas * cfg.minPorPeca + volumeM3 * cfg.minPorM3));
+  const minutos = Math.max(
+    1,
+    Math.round(cfg.baseMin + pecas * cfg.minPorPeca + volumeM3 * cfg.minPorM3),
+  );
   return { minutos, pecas, volumeM3: Math.round(volumeM3 * 100) / 100 };
 }
 

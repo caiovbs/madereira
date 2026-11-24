@@ -21,7 +21,10 @@ export class FinanceiroService {
     private readonly getCaixaUseCase: GetCaixaUseCase,
   ) {}
 
-  getMany(filter: GetLancamentosFilter, pagination: PaginationParams): Promise<LancamentoFinanceiro[]> {
+  getMany(
+    filter: GetLancamentosFilter,
+    pagination: PaginationParams,
+  ): Promise<LancamentoFinanceiro[]> {
     return this.getManyUseCase.execute({ filter, pagination });
   }
 

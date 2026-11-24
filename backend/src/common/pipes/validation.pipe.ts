@@ -12,7 +12,7 @@ export class ValidationPipe extends NestValidationPipe {
       whitelist: true,
       transform: true,
       disableErrorMessages: false,
-      exceptionFactory: ValidationPipe.formatErrors,
+      exceptionFactory: errors => ValidationPipe.formatErrors(errors),
     });
   }
 
@@ -25,7 +25,7 @@ export class ValidationPipe extends NestValidationPipe {
         return {
           name: property,
           message: constraints[constraintKeys[0]] || 'Argumento inválido',
-          constraints: constraintKeys.map((type) => ({
+          constraints: constraintKeys.map(type => ({
             type,
             message: constraints[type],
           })),
@@ -34,10 +34,7 @@ export class ValidationPipe extends NestValidationPipe {
     });
   }
 
-  static getAllErrors(
-    errors: ValidationError[],
-    parentKey?: string,
-  ): ValidationErrorConstraints[] {
+  static getAllErrors(errors: ValidationError[], parentKey?: string): ValidationErrorConstraints[] {
     return errors
       .reduce((arr, error) => {
         const newKey = parentKey ? `${parentKey}.${error.property}` : error.property;
@@ -49,6 +46,6 @@ export class ValidationPipe extends NestValidationPipe {
 
         return [...arr, error];
       }, [] as ValidationError[])
-      .filter((error) => error.constraints) as ValidationErrorConstraints[];
+      .filter(error => error.constraints) as ValidationErrorConstraints[];
   }
 }

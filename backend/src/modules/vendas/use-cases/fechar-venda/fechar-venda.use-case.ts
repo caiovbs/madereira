@@ -48,7 +48,11 @@ export class FecharVendaUseCase implements IUseCase<FecharVendaInput, Venda> {
       if (!produto || produto.qtdAtual < item.quantidade) {
         throw new BusinessRuleError(
           `Estoque insuficiente para o produto ${produto?.nome ?? item.produtoId}.`,
-          { produtoId: item.produtoId, disponivel: produto?.qtdAtual ?? 0, solicitado: item.quantidade },
+          {
+            produtoId: item.produtoId,
+            disponivel: produto?.qtdAtual ?? 0,
+            solicitado: item.quantidade,
+          },
         );
       }
     }
@@ -56,10 +60,12 @@ export class FecharVendaUseCase implements IUseCase<FecharVendaInput, Venda> {
     const situacao =
       data.formaPagamento === FormaPagamento.prazo ? LancSituacao.previsto : LancSituacao.realizado;
     const statusPagamento =
-      situacao === LancSituacao.realizado ? StatusPagamentoVenda.pago : StatusPagamentoVenda.a_receber;
+      situacao === LancSituacao.realizado
+        ? StatusPagamentoVenda.pago
+        : StatusPagamentoVenda.a_receber;
     const agora = new Date();
 
-    await this.prismaService.$transaction(async (tx) => {
+    await this.prismaService.$transaction(async tx => {
       // 1. Baixa de estoque
       for (const item of venda.itens) {
         await tx.movimentoEstoque.create({

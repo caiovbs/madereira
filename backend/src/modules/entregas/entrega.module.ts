@@ -9,7 +9,12 @@ import { GeocodingService } from './rota/geocoding.service';
 import { RoutingService } from './rota/routing.service';
 
 const exposedProviders: Provider[] = [EntregaRepository];
-const unexposedProviders: Provider[] = [EntregaService, RotaService, GeocodingService, RoutingService];
+const unexposedProviders: Provider[] = [
+  EntregaService,
+  RotaService,
+  GeocodingService,
+  RoutingService,
+];
 
 @Module({
   controllers: [RotaController, EntregaController],

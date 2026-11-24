@@ -4,7 +4,9 @@ import { ArrayNotEmpty, IsArray, IsUUID } from 'class-validator';
 import { RotaService } from './rota.service';
 
 export class SalvarOrdemRotaDto {
-  @ApiPropertyOptional({ description: 'IDs das entregas na ordem de visita (a primeira é a 1ª parada).' })
+  @ApiPropertyOptional({
+    description: 'IDs das entregas na ordem de visita (a primeira é a 1ª parada).',
+  })
   @IsArray()
   @ArrayNotEmpty()
   @IsUUID('all', { each: true })
@@ -20,8 +22,16 @@ export class RotaController {
   @ApiQuery({ name: 'data', required: true, description: 'AAAA-MM-DD' })
   @ApiQuery({ name: 'caminhaoId', required: false })
   @ApiQuery({ name: 'motoristaId', required: false })
-  @ApiQuery({ name: 'otimizar', required: false, description: 'true = ignora a ordem salva e sugere uma nova (não grava).' })
-  @ApiQuery({ name: 'saida', required: false, description: 'Horário de saída do caminhão, HH:MM (padrão 08:00).' })
+  @ApiQuery({
+    name: 'otimizar',
+    required: false,
+    description: 'true = ignora a ordem salva e sugere uma nova (não grava).',
+  })
+  @ApiQuery({
+    name: 'saida',
+    required: false,
+    description: 'Horário de saída do caminhão, HH:MM (padrão 08:00).',
+  })
   montar(
     @Query('data') data: string,
     @Query('caminhaoId') caminhaoId?: string,
@@ -29,7 +39,13 @@ export class RotaController {
     @Query('otimizar') otimizar?: string,
     @Query('saida') saida?: string,
   ) {
-    return this.service.montar({ data, caminhaoId, motoristaId, otimizar: otimizar === 'true', saida });
+    return this.service.montar({
+      data,
+      caminhaoId,
+      motoristaId,
+      otimizar: otimizar === 'true',
+      saida,
+    });
   }
 
   @Put('/ordem')

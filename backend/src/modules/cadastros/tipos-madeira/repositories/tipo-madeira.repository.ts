@@ -25,8 +25,6 @@ export class TipoMadeiraRepository extends BaseRepositoryPrisma(TipoMadeira, 'ti
     const where: any = {};
     if (filter.ativo !== undefined) where.ativo = filter.ativo;
     if (filter.search) where.nome = { contains: filter.search, mode: 'insensitive' };
-    return this.formatMany(
-      await this.delegate.findMany({ where, orderBy: { nome: 'asc' } }),
-    );
+    return this.formatMany(await this.delegate.findMany({ where, orderBy: { nome: 'asc' } }));
   }
 }
