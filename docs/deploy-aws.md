@@ -3,11 +3,21 @@
 > **Status:** plano, ainda não implementado nem testado. Nada aqui foi rodado (`terraform plan`, build das imagens).
 > **Objetivo:** subir o projeto numa única VM da AWS via IaC (Terraform), sem custo, só para estudo — ninguém vai usar.
 
+## Requisito de custo
+
+- **Nenhum real do bolso.** O teto absoluto são os **US$ 100 de créditos** do plano Free da AWS (conta da nova experiência, `us-east-2`), válidos até **24/05/2027**. Nunca ultrapassar, nunca fazer upgrade para o plano pago.
+- **Gastar o mínimo possível desses créditos:**
+  - preferir o que é grátis (GitHub Actions, GHCR, CodeDeploy para EC2, cotas sempre gratuitas);
+  - desligar a EC2 quando não estiver em uso e rodar `terraform destroy` quando não precisar mais;
+  - evitar serviços com custo fixo por hora: NAT Gateway, ALB, Elastic IP ocioso, RDS ligado à toa.
+- **Antes de criar ou alterar qualquer recurso:** estimar o custo em créditos (por mês e até 24/05/2027) e revisar o `terraform plan`.
+- **Referência de ritmo:** US$ 100 em 6 meses ≈ US$ 16/mês. Os alertas do AWS Budgets devem avisar bem antes disso.
+
 ## Free tier: depende da data da conta
 
 | Conta criada | O que é grátis |
 |---|---|
-| **A partir de 15/07/2025** (plano Free) | US$ 100 em créditos (até US$ 200 com atividades). No plano Free a conta não gera cobrança: ao acabar créditos/prazo, os recursos param. Prazo de 6 ou 12 meses (fontes divergem; conferir em Billing → Credits). Instâncias elegíveis incluem `t3.micro` e `t4g.micro`. |
+| **A partir de 15/07/2025** (plano Free) | US$ 100 em créditos (até US$ 200 com atividades). No plano Free a conta não gera cobrança: ao acabar créditos/prazo, os recursos param. Prazo de 6 meses (nesta conta, até 24/05/2027, conferido no painel "Custo e uso"). Instâncias elegíveis incluem `t3.micro` e `t4g.micro`. |
 | **Antes disso** (free tier legado) | 750 h/mês de `t2.micro`/`t3.micro`, 30 GB de EBS e 750 h de IPv4 público nos primeiros 12 meses. Passou disso, cobra no cartão. |
 
 ## Desenho
