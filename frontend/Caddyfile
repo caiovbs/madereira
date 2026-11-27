@@ -1,0 +1,18 @@
+# Sem domínio/HTTPS (acesso restrito por IP no security group). API_UPSTREAM: endereço da API na rede do Compose.
+:80 {
+	encode zstd gzip
+
+	handle_path /api/* {
+		reverse_proxy {$API_UPSTREAM:api:3000}
+	}
+
+	handle {
+		root * /srv
+		# Arquivos do Vite têm hash no nome: podem ficar em cache "para sempre".
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+		# SPA: rotas do React Router caem no index.html.
+		try_files {path} /index.html
+		file_server
+	}
+}

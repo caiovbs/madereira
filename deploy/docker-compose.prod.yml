@@ -1,0 +1,54 @@
+# Stack de produção (estudo) para uma única VM pequena (t3.micro, 1 GB de RAM).
+#   cp .env.example .env   # e defina DB_PASSWORD
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Só a porta do web (Caddy) é publicada; Postgres e API ficam na rede interna do Compose.
+name: madereira
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: madeireira
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no deploy/.env}
+      POSTGRES_DB: madeireira
+    # Ajustes para pouca memória.
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=30"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U madeireira -d madeireira"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    mem_limit: 256m
+
+  api:
+    image: ${API_IMAGE:-madereira-api:local}
+    build: ../backend
+    restart: unless-stopped
+    env_file:
+      # Opcionais da Rota do dia (DEPOSITO_*, OSRM_URL, NOMINATIM_URL...). Ver backend/.env.example.
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql://madeireira:${DB_PASSWORD}@db:5432/madeireira?schema=public
+      NODE_OPTIONS: --max-old-space-size=256
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 384m
+
+  web:
+    image: ${WEB_IMAGE:-madereira-web:local}
+    build: ../frontend
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 64m
+
+volumes:
+  pgdata:
