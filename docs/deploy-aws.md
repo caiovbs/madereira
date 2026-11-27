@@ -119,88 +119,17 @@ output "url" { value = "http://${aws_instance.app.public_ip}" }
 
 ## Containers
 
-### `backend/Dockerfile`
+Implementados e testados localmente (build, migrations, seed e smoke test passando pelo proxy do Caddy). O job `Docker` do CI builda as duas imagens em todo PR.
 
-```dockerfile
-FROM node:22-slim AS build
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npx prisma generate && npm run build && npm prune --omit=dev
+| Arquivo | O que faz |
+|---|---|
+| [`backend/Dockerfile`](../backend/Dockerfile) | `node:22-slim` em dois estágios. Gera o Prisma Client, builda e faz `npm prune --omit=dev`. Na subida roda `prisma migrate deploy` e depois `node dist/main`, como usuário `node`, com healthcheck em `/docs`. O CLI `prisma` foi movido para `dependencies` para sobreviver ao prune. |
+| [`frontend/Dockerfile`](../frontend/Dockerfile) | Build do Vite com `VITE_API_URL=/api` e imagem final `caddy:2-alpine` com o build em `/srv`. |
+| [`frontend/Caddyfile`](../frontend/Caddyfile) | Embutido na imagem do front. Faz proxy de `/api/*` para `api:3000` (tirando o prefixo), fallback de SPA para `index.html`, gzip/zstd e cache longo em `/assets/*`. |
+| [`deploy/docker-compose.prod.yml`](../deploy/docker-compose.prod.yml) | `db` (Postgres 16 alpine, sem porta exposta, ajustado para pouca RAM), `api` e `web`. Só a porta do `web` é publicada (`WEB_PORT`, padrão 80). Tem limites de memória e espera o banco/API ficarem saudáveis. |
+| [`deploy/.env.example`](../deploy/.env.example) | `DB_PASSWORD` (obrigatória), `WEB_PORT`, `API_IMAGE`/`WEB_IMAGE` (para usar imagens do GHCR no lugar do build local) e as opcionais da Rota do dia. |
 
-FROM node:22-slim
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-WORKDIR /app
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
-COPY package.json ./
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
-```
-
-Atenção: o `npm prune` remove o CLI `prisma` (devDependency), que o `migrate deploy` usa. Mover `prisma` para `dependencies` ou rodar o migrate a partir do estágio de build.
-
-### `frontend/Dockerfile`
-
-Front buildado com `VITE_API_URL=/api` (mesma origem, sem CORS):
-
-```dockerfile
-FROM node:22-slim AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-ENV VITE_API_URL=/api
-RUN npm run build
-
-FROM caddy:2
-COPY --from=build /app/dist /srv
-```
-
-### `deploy/Caddyfile`
-
-```
-:80 {
-	handle_path /api/* {
-		reverse_proxy api:3000
-	}
-	handle {
-		root * /srv
-		try_files {path} /index.html
-		file_server
-	}
-}
-```
-
-### `deploy/docker-compose.prod.yml`
-
-```yaml
-services:
-  db:
-    image: postgres:16
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: madeireira
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: madeireira
-    volumes: [pgdata:/var/lib/postgresql/data]
-  api:
-    build: ../backend
-    restart: unless-stopped
-    environment:
-      DATABASE_URL: postgresql://madeireira:${DB_PASSWORD}@db:5432/madeireira?schema=public
-    depends_on: [db]
-  web:
-    build: ../frontend
-    restart: unless-stopped
-    ports: ["80:80"]
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-    depends_on: [api]
-volumes: { pgdata: {} }
-```
+Medido localmente com a stack rodando: cerca de 150 MB de RAM no total (db ~60, api ~70, web ~18), folgado para a `t3.micro`. A imagem da API tem ~820 MB (Debian + engines do Prisma); dá para enxugar depois.
 
 ## Uso
 
@@ -211,7 +140,7 @@ terraform apply -var meu_ip=$(curl -s ifconfig.me)/32 -var email=voce@exemplo.co
 
 ssh ubuntu@<ip>
 git clone https://github.com/caiovbs/madereira && cd madereira/deploy
-echo "DB_PASSWORD=$(openssl rand -hex 16)" > .env
+cp .env.example .env && sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$(openssl rand -hex 16)/" .env
 docker compose -f docker-compose.prod.yml up -d --build   # 1ª vez demora (swap)
 
 # Terminou de estudar:
@@ -228,7 +157,7 @@ terraform destroy
 
 ## Próximos passos
 
-1. Criar de fato `infra/`, os Dockerfiles e `deploy/` e testar o build das imagens.
+1. Criar de fato `infra/` (Terraform). Os Dockerfiles e o `deploy/` já existem.
 2. Opcional: GitHub Actions buildando as imagens (evita build na `t3.micro`) e fazendo o deploy por SSH.
 
 ## Fontes
